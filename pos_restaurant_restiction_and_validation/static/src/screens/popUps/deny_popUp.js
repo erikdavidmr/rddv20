@@ -3,22 +3,22 @@
 /* See LICENSE file for full copyright and licensing details. */
 /* License URL : <https://store.webkul.com/license.html/> */
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component } from "@odoo/owl";
+import { Component, useProps, t } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-console.log("entro x11");
 export class DenyPopup extends Component {
     static template = "pos_restaurant_restiction_and_validation.DenyPopup";
     
     static components = { Dialog };
     
-    static defaultProps = {
-        
-        confirmText: _t("Autorizar"),
-        cancelText: _t("Descartar"),
-        title: "",
-        description: "",
-        body: "",
-    };
+    props = useProps({
+        confirmText: t.string.optional(_t("Autorizar")),
+        cancelText: t.string.optional(_t("Descartar")),
+        title: t.string.optional(""),
+        description: t.string.optional(""),
+        body: t.string.optional(""),
+        getPayload: t.function(),
+        close: t.function(),
+    });
 
     cancel(){
         this.props.close();

@@ -69,3 +69,12 @@ class TestManagerApprovalContract(TransactionCase):
         self.assertIn("cashier._role === 'cashier'", (addon / active_scripts[1]).read_text())
         source = (addon / active_scripts[2]).read_text()
         self.assertNotIn('"pin"', source)
+
+    def test_authorization_popup_declares_owl_3_props_schema(self):
+        addon = Path(__file__).parents[1]
+        source = (addon / "static/src/screens/popUps/deny_popUp.js").read_text()
+        self.assertIn('import { Component, useProps, t } from "@odoo/owl";', source)
+        self.assertIn("props = useProps({", source)
+        self.assertIn("getPayload: t.function()", source)
+        self.assertIn("close: t.function()", source)
+        self.assertNotIn("static defaultProps", source)
