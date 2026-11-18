@@ -63,7 +63,7 @@ patch(OrderSummary.prototype, {
 
                 return {
                     id: uom.id,
-                    label: `${this.env.utils.formatCurrency(previewForUom(uom))} (${uom.name})`,
+                    label: `${this.pos.formatCurrency(previewForUom(uom))} (${uom.name})`,
                     isSelected: currentUom?.id === uom.id,
                     item: multi, // compat: SelectionPopup puede devolver este wrapper
                 };

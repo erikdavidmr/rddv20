@@ -8,6 +8,8 @@ class TestUomPriceContract(TransactionCase):
         source = (Path(__file__).parents[1] / "static/src/app/product_screen/order_summary/order_summary.js").read_text()
         self.assertIn("this.pos.getOrder()", source)
         self.assertNotIn("this.pos.get_order()", source)
+        self.assertIn("this.pos.formatCurrency(", source)
+        self.assertNotIn("this.env.utils.formatCurrency(", source)
         self.assertIn("@point_of_sale/app/utils/make_awaitable_dialog", source)
         self.assertIn("@point_of_sale/app/components/popups/selection_popup/selection_popup", source)
         self.assertNotIn("@point_of_sale/app/store/make_awaitable_dialog", source)
