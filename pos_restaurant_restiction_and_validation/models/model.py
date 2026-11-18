@@ -19,6 +19,13 @@ class PosConfig(models.Model):
     enable_restriction_on_order_delete = fields.Boolean("Enable Restriction on Order Delete", default=True)
     enable_restriction_on_session_close = fields.Boolean("Enable Restriction on Session Close", default=True)
 
+    @api.model
+    def _load_pos_data_fields(self, config):
+        loaded_fields = super()._load_pos_data_fields(config)
+        if "enable_restriction_on_session_close" not in loaded_fields:
+            loaded_fields.append("enable_restriction_on_session_close")
+        return loaded_fields
+
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"

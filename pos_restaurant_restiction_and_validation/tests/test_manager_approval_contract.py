@@ -119,3 +119,7 @@ class TestManagerApprovalContract(TransactionCase):
         self.assertIn("get canCloseSession()", source)
         self.assertIn("this.config.enable_restriction_on_session_close", source)
         self.assertIn('this.hasEmployeeRole(["cashier", "manager"])', source)
+
+    def test_session_close_restriction_flag_is_loaded_into_pos_config(self):
+        fields = self.env["pos.config"]._load_pos_data_fields(self.env["pos.config"])
+        self.assertIn("enable_restriction_on_session_close", fields)
