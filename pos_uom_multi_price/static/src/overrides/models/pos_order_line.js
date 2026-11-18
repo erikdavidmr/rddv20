@@ -113,7 +113,6 @@ patch(PosOrderline.prototype, {
 
     setUnitPrice(price) {
         super.setUnitPrice(price);
-        this.setDirty();
     },
 
     _calculatePriceForSelectedUom(quantity, pricelistOverride = null) {
@@ -249,7 +248,6 @@ patch(PosOrderline.prototype, {
             this.setUnitPrice(newPrice);
         }
 
-        this.setDirty();
         return true;
     },
 

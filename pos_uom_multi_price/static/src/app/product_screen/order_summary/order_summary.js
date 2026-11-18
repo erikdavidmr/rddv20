@@ -8,10 +8,10 @@ import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 
 patch(OrderSummary.prototype, {
     async ProductUomMultiButton(line) {
-        const order = this.pos.get_order();
+        const order = this.pos.getOrder();
         if (!order) return;
 
-        const targetLine = line || order.get_selected_orderline();
+        const targetLine = line || order.getSelectedOrderline();
         if (!targetLine) return;
 
         const product = targetLine.product_id;
@@ -19,7 +19,7 @@ patch(OrderSummary.prototype, {
 
         // ✅ SIEMPRE tomar la pricelist del pedido actual
         const pricelist = order.pricelist_id;
-        const qty = targetLine.get_quantity() || 1;
+        const qty = targetLine.getQuantity() || 1;
 
         // Resolver UoM real desde el store
         const uomModel = targetLine.models?.["uom.uom"];
@@ -42,8 +42,8 @@ patch(OrderSummary.prototype, {
                     return targetLine._calculatePriceForSelectedUom(qty, pricelist);
                 }
                 // fallback mínimo (idealmente siempre existe el helper)
-                const extra = targetLine.get_price_extra ? targetLine.get_price_extra() : 0;
-                return product.get_price(pricelist, qty, extra, qty);
+                const extra = targetLine.getPriceExtra ? targetLine.getPriceExtra() : 0;
+                return product.getPrice(pricelist, qty, extra, false, product);
             } finally {
                 targetLine.uom_id = prev;
             }
@@ -97,31 +97,29 @@ patch(OrderSummary.prototype, {
         targetLine.uom_id = selectedUom;
 
         // ✅ Reaplicar qty con redondeo según la nueva UoM (sin recalcular precio aquí)
-        if (typeof targetLine.set_quantity === "function") {
-            targetLine.set_quantity(targetLine.get_quantity(), true);
+        if (typeof targetLine.setQuantity === "function") {
+            targetLine.setQuantity(targetLine.getQuantity(), true);
         }
 
         // ✅ Calcular precio final unitario con la pricelist actual
         const finalPrice =
             typeof targetLine._calculatePriceForSelectedUom === "function"
-                ? targetLine._calculatePriceForSelectedUom(targetLine.get_quantity(), pricelist)
+                ? targetLine._calculatePriceForSelectedUom(targetLine.getQuantity(), pricelist)
                 : previewForUom(selectedUom);
 
-        targetLine.set_unit_price(finalPrice);
+        targetLine.setUnitPrice(finalPrice);
 
         // ✅ MUY IMPORTANTE: no dejarla como "manual", para que cambios de cliente/pricelist sigan aplicando
         if ("price_type" in targetLine) {
             targetLine.price_type = "original";
         }
 
-        targetLine.setDirty();
-        targetLine.setLinePrice?.(); // por si tu build no recalcula totales al vuelo
     },
 
     // Sobrescribir setLinePrice para permitir cambios sin validación, pero manteniendo "original"
     async setLinePrice(line, price) {
         if (line?.product_id?.multi_uom_price_ids?.length) {
-            line.set_unit_price(price);
+            line.setUnitPrice(price);
             if ("price_type" in line) {
                 line.price_type = "original";
             }

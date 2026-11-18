@@ -39,3 +39,11 @@ class TestManagerApprovalContract(TransactionCase):
             source = (addon / relative_path).read_text()
             for module in imports:
                 self.assertIn(module, source, f"{relative_path} must import {module}")
+
+    def test_orderline_restrictions_use_odoo_20_pos_apis(self):
+        addon = Path(__file__).parents[1]
+        source = (addon / "static/src/app/decrease_quantity_by_manager.js").read_text()
+        for api in ("this.pos.getOrder()", "getSelectedOrderline()", "getProduct()", "getOrderlines()"):
+            self.assertIn(api, source)
+        for legacy_api in ("get_order()", "get_selected_orderline()", "get_product()", "get_orderlines()"):
+            self.assertNotIn(legacy_api, source)

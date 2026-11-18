@@ -24,12 +24,12 @@ patch(OrderSummary.prototype, {
 
     async confirm(selected_manager) {
         const manager = selected_manager.id;
-        const cashier1 = this.pos.get_cashier().id;
-        console.log('cajero ', this.pos.get_cashier())
-        const session_id = this.pos.config.current_session_id.id;
+        const cashier1 = this.pos.accessRight.cashier?.id;
+        const session_id = this.pos.session.id;
         const state = 'orderline_deleted';
-        const receipt = this.pos.get_order().uid;
-        const order_num = this.pos.get_order().trackingNumber;
+        const order = this.pos.getOrder();
+        const receipt = order.uuid;
+        const order_num = order.tracking_number;
 
         await this.orm.call("manager.approval", "getting_all_data", [{
             session_id,
@@ -75,8 +75,8 @@ patch(OrderSummary.prototype, {
     },
 
     async updateSelectedOrderline({ buffer, key }) {
-        const order = this.pos.get_order();
-        const selectedLine = order.get_selected_orderline();
+        const order = this.pos.getOrder();
+        const selectedLine = order.getSelectedOrderline();
 
         if (key === 'Backspace') {
             if (!selectedLine) {
@@ -85,7 +85,7 @@ patch(OrderSummary.prototype, {
             }
 
             // Obtenemos el producto de la línea seleccionada
-            const product = selectedLine.get_product();
+            const product = selectedLine.getProduct();
             if (!product) {
                 // Si no hay producto, llamar al método padre
                 return super.updateSelectedOrderline(...arguments);
@@ -114,19 +114,19 @@ patch(OrderSummary.prototype, {
 
     _checkIfNeedsManagerApproval(order, productId) {
         // Verificar si el usuario actual es cashier (necesita aprobación)
-        if (this.pos.cashier._role !== 'cashier') {
+        if (this.pos.accessRight.cashier?._role !== 'cashier') {
             return false;
         }
 
         // Verificar si hay líneas en la orden
-        const orderlines = order.get_orderlines();
+        const orderlines = order.getOrderlines();
         if (!orderlines.length) {
             return false;
         }
 
         // Verificar si el producto está en las líneas actuales
         const productExists = orderlines.some(line => {
-            const lineProduct = line.get_product();
+            const lineProduct = line.getProduct();
             return lineProduct && lineProduct.id === productId;
         });
 
