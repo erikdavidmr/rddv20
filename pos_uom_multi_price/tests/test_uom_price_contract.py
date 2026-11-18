@@ -18,6 +18,8 @@ class TestUomPriceContract(TransactionCase):
         self.assertIn('t-set-slot="uom-multi-price"', parent_template)
         self.assertIn("this.pos.config.ka_multi_uom", parent_template)
         self.assertIn("flex-shrink-0", parent_template)
+        self.assertIn('class="btn btn-link btn-sm p-0 text-success flex-shrink-0"', parent_template)
+        self.assertIn(">UDM</button>", parent_template)
         self.assertNotIn("pos.config.ka_multi_uom", parent_template.replace("this.pos.config.ka_multi_uom", ""))
         self.assertIn("//span[hasclass('text-wrap')]", orderline_template)
         self.assertIn('t-call-slot="uom-multi-price"', orderline_template)
