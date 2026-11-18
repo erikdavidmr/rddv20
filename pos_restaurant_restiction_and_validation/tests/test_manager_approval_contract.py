@@ -62,7 +62,8 @@ class TestManagerApprovalContract(TransactionCase):
         for relative_path in active_scripts:
             source = (addon / relative_path).read_text()
             self.assertIn('models["hr.employee"].getAll()', source, relative_path)
-            self.assertIn("manager_employee_ids", source, relative_path)
+            self.assertNotIn("manager_employee_ids", source, relative_path)
+            self.assertIn('employee._role === "manager"', source, relative_path)
             pin_check = "Sha1.hash(this.state.pin)" if relative_path == active_scripts[2] else "Sha1.hash(payload)"
             self.assertIn(pin_check, source, relative_path)
         self.assertIn("cashier?._role !== 'cashier'", (addon / active_scripts[0]).read_text())

@@ -145,9 +145,8 @@ patch(OrderSummary.prototype, {
         }
 
         // Obtener lista de managers disponibles
-        const managerIds = this.pos.config.manager_employee_ids || [];
         const employeesList = this.pos.models["hr.employee"].getAll().filter(
-            (employee) => managerIds.includes(employee.id) && employee._role === "manager"
+            (employee) => employee._role === "manager"
         );
         if (!employeesList?.length) {
             await this.env.services.dialog.add(AlertDialog, {

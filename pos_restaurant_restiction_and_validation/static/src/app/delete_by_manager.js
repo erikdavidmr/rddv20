@@ -80,9 +80,8 @@ patch(PosStore.prototype, {
         }
 
         // Obtener lista de managers disponibles
-        const managerIds = this.config.manager_employee_ids || [];
         const employeesList = this.models["hr.employee"].getAll().filter(
-            (employee) => managerIds.includes(employee.id) && employee._role === "manager"
+            (employee) => employee._role === "manager"
         );
         if (!employeesList?.length) {
             await this.env.services.dialog.add(AlertDialog, {

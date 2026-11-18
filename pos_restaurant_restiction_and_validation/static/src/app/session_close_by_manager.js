@@ -375,9 +375,8 @@ patch(ClosePosPopup.prototype, {
 
         // Obtener lista de managers
         const configId = this.pos.config.id;
-        const managerIds = this.pos.config.manager_employee_ids || [];
         const managers = this.pos.models["hr.employee"].getAll().filter(
-            (employee) => managerIds.includes(employee.id) && employee._role === "manager"
+            (employee) => employee._role === "manager"
         );
         
         console.log("[ClosePosPopup] Managers disponibles:", managers);
