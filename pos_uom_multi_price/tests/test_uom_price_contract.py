@@ -17,6 +17,7 @@ class TestUomPriceContract(TransactionCase):
         orderline_template = (addon / "static/src/overrides/components/Screens/orderline/Orderline.xml").read_text()
         self.assertIn('t-set-slot="uom-multi-price"', parent_template)
         self.assertIn("this.pos.config.ka_multi_uom", parent_template)
+        self.assertIn("flex-shrink-0", parent_template)
         self.assertNotIn("pos.config.ka_multi_uom", parent_template.replace("this.pos.config.ka_multi_uom", ""))
         self.assertIn("//span[hasclass('text-wrap')]", orderline_template)
         self.assertIn('t-call-slot="uom-multi-price"', orderline_template)
