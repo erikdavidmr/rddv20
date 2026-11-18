@@ -27,8 +27,10 @@ class TestUomPriceContract(TransactionCase):
         config.ka_multi_uom = True
 
         models = self.env["pos.session"]._load_pos_data_models(config)
+        config_fields = self.env["pos.config"]._load_pos_data_fields(config)
 
         self.assertIn("product.multi.uom.price", models)
+        self.assertIn("ka_multi_uom", config_fields)
 
     def test_multi_uom_price_scales_from_product_reference_uom(self):
         dozen = self.env.ref("uom.product_uom_dozen")

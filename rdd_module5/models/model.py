@@ -47,6 +47,8 @@ class PosConfig(models.Model):
             for field_name in ("default_product_id", "down_payment_product_id")
             if field_name in self._fields
         )
+        if "ka_multi_uom" in self._fields:
+            fields_to_load.append("ka_multi_uom")
         if "not_print_qr_url" in self._fields:
             fields_to_load.append("not_print_qr_url")
         return fields_to_load
