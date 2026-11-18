@@ -6,7 +6,7 @@ import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, useProps, t, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { ask } from "@point_of_sale/app/utils/make_awaitable_dialog";
 
@@ -14,31 +14,31 @@ export class ManagerSelectPopup extends Component {
     static template = xml`
         <div class="popup">
             <div class="header">
-                <t t-esc="props.title"/>
+                <t t-esc="this.props.title"/>
             </div>
             <div class="body">
-                <select t-model="state.selectedManagerId" class="form-select mb-3">
-                    <t t-foreach="props.managers" t-as="manager" t-key="manager.id">
+                <select t-model.proxy="this.state.selectedManagerId" class="form-select mb-3">
+                    <t t-foreach="this.props.managers" t-as="manager" t-key="manager.id">
                         <option t-att-value="manager.id" t-esc="manager.name"/>
                     </t>
                 </select>
-                <input type="password" t-model="state.pin" class="form-control mb-3" placeholder="Enter PIN" t-on-keyup="_onPinKeyup"/>
+                <input type="password" t-model.proxy="this.state.pin" class="form-control mb-3" placeholder="Enter PIN" t-on-keyup="this._onPinKeyup"/>
             </div>
             <div class="footer">
-                <button t-on-click="confirm" class="btn btn-primary">Confirm</button>
-                <button t-on-click="cancel" class="btn btn-secondary">Cancel</button>
+                <button t-on-click="this.confirm" class="btn btn-primary">Confirm</button>
+                <button t-on-click="this.cancel" class="btn btn-secondary">Cancel</button>
             </div>
         </div>`;
 
-    static props = {
-        title: { type: String, optional: true },
-        managers: Array,
-        onConfirm: Function,
-    };
+    props = useProps({
+        title: t.string().optional(""),
+        managers: t.array(),
+        onConfirm: t.function(),
+    });
 
     setup() {
         console.log("[ManagerSelectPopup] Setup iniciado");
-        this.state = useState({
+        this.state = proxy({
             selectedManagerId: this.props.managers[0]?.id || null,
             pin: "",
         });
@@ -100,22 +100,21 @@ export class ManagerSelectPopup extends Component {
 
 export class ManagerSelectDialog extends Component {
     static template = xml`
-        <Dialog title="props.title" size="'md'">
+        <Dialog title="this.props.title" size="'md'">
             <ManagerSelectPopup
-                title="props.title"
-                managers="props.managers"
-                onConfirm="props.onClose" 
+                title="this.props.title"
+                managers="this.props.managers"
+                onConfirm="this.props.onClose" 
             />
         </Dialog>`;
     
     static components = { Dialog, ManagerSelectPopup };
-    static props = {
-        title: String,
-        managers: Array,
-        onClose: Function, 
-        close: Function, 
-        "*": true,
-    };
+    props = useProps({
+        title: t.string(),
+        managers: t.array(),
+        onClose: t.function(),
+        close: t.function().optional(),
+    });
 }
 
 // Template genérico que aparece después de hacer clic en "Close Register"
@@ -123,21 +122,21 @@ export class SessionCloseTemplatePopup extends Component {
     static template = xml`
         <div class="popup close-session-template">
             <div class="header">
-                <h4><t t-esc="props.title"/></h4>
+                <h4><t t-esc="this.props.title"/></h4>
             </div>
             <div class="body">
                 <div class="alert alert-info mb-3">
                     <div class="row">
                         <div class="col-md-6">
                             <h6><i class="fa fa-user"></i> Session Information</h6>
-                            <p><strong>Manager:</strong> <t t-esc="props.managerName"/></p>
-                            <p><strong>Sesión ID:</strong> <t t-esc="props.sessionId"/></p>
-                            <p><strong>Cajero:</strong> <t t-esc="props.cashierName"/></p>
+                            <p><strong>Manager:</strong> <t t-esc="this.props.managerName"/></p>
+                            <p><strong>Sesión ID:</strong> <t t-esc="this.props.sessionId"/></p>
+                            <p><strong>Cajero:</strong> <t t-esc="this.props.cashierName"/></p>
                         </div>
                         <div class="col-md-6">
                             <h6><i class="fa fa-clock-o"></i> Timing</h6>
-                            <p><strong>Inicio de sesión:</strong> <t t-esc="props.sessionStart"/></p>
-                            <p><strong>Hora de cierre:</strong> <t t-esc="props.currentDate"/></p>
+                            <p><strong>Inicio de sesión:</strong> <t t-esc="this.props.sessionStart"/></p>
+                            <p><strong>Hora de cierre:</strong> <t t-esc="this.props.currentDate"/></p>
                         </div>
                     </div>
                 </div>
@@ -153,13 +152,13 @@ export class SessionCloseTemplatePopup extends Component {
                                     <div class="col-6">
                                         <label class="text-muted">Esperado:</label>
                                         <div class="h5 text-success">
-                                            <t t-esc="env.utils.formatCurrency(props.cashData.expected || 0)"/>
+                                            <t t-esc="this.env.utils.formatCurrency(this.props.cashData.expected || 0)"/>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <label class="text-muted">Contado:</label>
-                                        <div class="h5" t-att-class="props.cashData.difference !== 0 ? 'text-warning' : 'text-success'">
-                                            <t t-esc="env.utils.formatCurrency(props.cashData.counted || 0)"/>
+                                        <div class="h5" t-att-class="this.props.cashData.difference !== 0 ? 'text-warning' : 'text-success'">
+                                            <t t-esc="this.env.utils.formatCurrency(this.props.cashData.counted || 0)"/>
                                         </div>
                                     </div>
                                 </div>
@@ -167,8 +166,8 @@ export class SessionCloseTemplatePopup extends Component {
                                 <div class="row">
                                     <div class="col-12">
                                         <label class="text-muted">Diferencia:</label>
-                                        <div class="h5" t-att-class="props.cashData.difference !== 0 ? 'text-danger' : 'text-success'">
-                                            <t t-esc="env.utils.formatCurrency(props.cashData.difference || 0)"/>
+                                        <div class="h5" t-att-class="this.props.cashData.difference !== 0 ? 'text-danger' : 'text-success'">
+                                            <t t-esc="this.env.utils.formatCurrency(this.props.cashData.difference || 0)"/>
                                         </div>
                                     </div>
                                 </div>
@@ -186,13 +185,13 @@ export class SessionCloseTemplatePopup extends Component {
                                     <div class="col-6">
                                         <label class="text-muted">Total de Ordenes:</label>
                                         <div class="h5 text-primary">
-                                            <t t-esc="props.salesData.totalOrders || 0"/>
+                                            <t t-esc="this.props.salesData.totalOrders || 0"/>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <label class="text-muted">Cantidad Ttotal:</label>
                                         <div class="h5 text-primary">
-                                            <t t-esc="env.utils.formatCurrency(props.salesData.totalAmount || 0)"/>
+                                            <t t-esc="this.env.utils.formatCurrency(this.props.salesData.totalAmount || 0)"/>
                                         </div>
                                     </div>
                                 </div>
@@ -202,12 +201,12 @@ export class SessionCloseTemplatePopup extends Component {
                 </div>
                 
                 <!-- Notas de cierre si existen -->
-                <div t-if="props.closingNotes" class="card mb-3">
+                <div t-if="this.props.closingNotes" class="card mb-3">
                     <div class="card-header">
                         <h6 class="mb-0"><i class="fa fa-comment"></i> Closing Notes</h6>
                     </div>
                     <div class="card-body">
-                        <p class="mb-0" t-esc="props.closingNotes"/>
+                        <p class="mb-0" t-esc="this.props.closingNotes"/>
                     </div>
                 </div>
                 
@@ -225,7 +224,7 @@ export class SessionCloseTemplatePopup extends Component {
                 <div class="d-flex justify-content-between">
                    
                     <div class="btn-group">
-                        <button t-on-click="proceedWithClose" class="btn btn-success">
+                        <button t-on-click="this.proceedWithClose" class="btn btn-success">
                             <i class="fa fa-check"></i> Confirmar Cierre de sesión
                         </button>
                     </div>
@@ -233,18 +232,18 @@ export class SessionCloseTemplatePopup extends Component {
             </div>
         </div>`;
 
-    static props = {
-        title: { type: String, optional: true },
-        managerName: String,
-        cashierName: String,
-        sessionId: [String, Number],
-        sessionStart: String,
-        currentDate: String,
-        cashData: Object,
-        salesData: Object,
-        closingNotes: { type: String, optional: true },
-        onConfirm: Function,
-    };
+    props = useProps({
+        title: t.string().optional(""),
+        managerName: t.string(),
+        cashierName: t.string(),
+        sessionId: t.or([t.string(), t.number()]),
+        sessionStart: t.string(),
+        currentDate: t.string(),
+        cashData: t.object(),
+        salesData: t.object(),
+        closingNotes: t.string().optional(""),
+        onConfirm: t.function(),
+    });
 
     setup() {
         console.log("[SessionCloseTemplatePopup] Setup iniciado");
@@ -269,20 +268,20 @@ export class SessionCloseTemplateDialog extends Component {
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" t-esc="props.title"/>
+                        <h4 class="modal-title" t-esc="this.props.title"/>
                     </div>
                     <div class="modal-body p-0">
                         <SessionCloseTemplatePopup
-                            title="props.title"
-                            managerName="props.managerName"
-                            cashierName="props.cashierName"
-                            sessionId="props.sessionId"
-                            sessionStart="props.sessionStart"
-                            currentDate="props.currentDate"
-                            cashData="props.cashData"
-                            salesData="props.salesData"
-                            closingNotes="props.closingNotes"
-                            onConfirm="handleConfirm.bind(this)" 
+                            title="this.props.title"
+                            managerName="this.props.managerName"
+                            cashierName="this.props.cashierName"
+                            sessionId="this.props.sessionId"
+                            sessionStart="this.props.sessionStart"
+                            currentDate="this.props.currentDate"
+                            cashData="this.props.cashData"
+                            salesData="this.props.salesData"
+                            closingNotes="this.props.closingNotes"
+                            onConfirm="this.handleConfirm.bind(this)" 
                         />
                     </div>
                 </div>
@@ -290,20 +289,19 @@ export class SessionCloseTemplateDialog extends Component {
         </div>`;
     
     static components = { SessionCloseTemplatePopup };
-    static props = {
-        title: String,
-        managerName: String,
-        cashierName: String,
-        sessionId: [String, Number],
-        sessionStart: String,
-        currentDate: String,
-        cashData: Object,
-        salesData: Object,
-        closingNotes: { type: String, optional: true },
-        onClose: Function, 
-        close: { type: Function, optional: true },
-        "*": true,
-    };
+    props = useProps({
+        title: t.string(),
+        managerName: t.string(),
+        cashierName: t.string(),
+        sessionId: t.or([t.string(), t.number()]),
+        sessionStart: t.string(),
+        currentDate: t.string(),
+        cashData: t.object(),
+        salesData: t.object(),
+        closingNotes: t.string().optional(""),
+        onClose: t.function(),
+        close: t.function().optional(),
+    });
 
     handleConfirm(result) {
         console.log("[SessionCloseTemplateDialog] handleConfirm llamado con:", result);

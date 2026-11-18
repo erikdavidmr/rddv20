@@ -80,3 +80,16 @@ class TestManagerApprovalContract(TransactionCase):
         self.assertIn("getPayload: t.function()", source)
         self.assertIn("close: t.function()", source)
         self.assertNotIn("static defaultProps", source)
+        template = (addon / "static/src/screens/popUps/deny_popUp.xml").read_text()
+        self.assertIn('title="this.props.title"', template)
+        self.assertIn('t-esc="this.props.body"', template)
+        self.assertNotIn('props.title', template.replace('this.props.title', ''))
+
+    def test_session_authorization_dialog_uses_owl_3_props_and_template_context(self):
+        addon = Path(__file__).parents[1]
+        source = (addon / "static/src/app/session_close_by_manager.js").read_text()
+        self.assertIn("import { Component, proxy, useProps, t, xml } from \"@odoo/owl\";", source)
+        self.assertNotIn("static props =", source)
+        self.assertIn("props = useProps({", source)
+        self.assertIn('this.props.managers', source)
+        self.assertIn('t-model.proxy="this.state.pin"', source)

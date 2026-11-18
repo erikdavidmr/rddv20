@@ -4,16 +4,16 @@
 <!-- License URL : <https://store.webkul.com/license.html/> -->
 <template id="popup" xml:space="preserve">
     <t t-name="pos_restaurant_restiction_and_validation.DenyPopup">
-        <Dialog size="'md'" title="props.title">
+        <Dialog size="'md'" title="this.props.title">
             <div class="popup popup-textarea">
     
                 <div class="modal-body">
-                    <t t-esc="props.body" />
+                    <t t-esc="this.props.body" />
                 </div>
                 <t t-set-slot="footer">
                     <div class="d-flex w-100 justify-content-start gap-2">
-                        <button class="button btn btn-primary o-default-button" t-on-click="confirm"><t t-esc="props.confirmText" /></button>
-                        <button class="button btn btn-secondary o-default-button" t-on-click="cancel"><t t-esc="props.cancelText" /></button>
+                        <button class="button btn btn-primary o-default-button" t-on-click="this.confirm"><t t-esc="this.props.confirmText" /></button>
+                        <button class="button btn btn-secondary o-default-button" t-on-click="this.cancel"><t t-esc="this.props.cancelText" /></button>
                     </div>
                 </t>
             </div>
