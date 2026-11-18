@@ -75,6 +75,8 @@ class TestManagerApprovalContract(TransactionCase):
         source = (addon / "static/src/screens/popUps/deny_popUp.js").read_text()
         self.assertIn('import { Component, useProps, t } from "@odoo/owl";', source)
         self.assertIn("props = useProps({", source)
+        self.assertIn("confirmText: t.string().optional(", source)
+        self.assertIn("body: t.string().optional(", source)
         self.assertIn("getPayload: t.function()", source)
         self.assertIn("close: t.function()", source)
         self.assertNotIn("static defaultProps", source)

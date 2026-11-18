@@ -11,11 +11,11 @@ export class DenyPopup extends Component {
     static components = { Dialog };
     
     props = useProps({
-        confirmText: t.string.optional(_t("Autorizar")),
-        cancelText: t.string.optional(_t("Descartar")),
-        title: t.string.optional(""),
-        description: t.string.optional(""),
-        body: t.string.optional(""),
+        confirmText: t.string().optional(_t("Autorizar")),
+        cancelText: t.string().optional(_t("Descartar")),
+        title: t.string().optional(""),
+        description: t.string().optional(""),
+        body: t.string().optional(""),
         getPayload: t.function(),
         close: t.function(),
     });
