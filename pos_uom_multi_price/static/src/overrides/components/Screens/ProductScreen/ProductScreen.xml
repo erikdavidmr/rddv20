@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_uom_multi_price.OrderSummary" t-inherit="point_of_sale.OrderSummary" t-inherit-mode="extension">
+        <xpath expr="//Orderline" position="inside">
+            <t t-set-slot="uom-multi-price">
+                <t t-if="this.pos.config.ka_multi_uom">
+                    <t t-if="line.product_id.multi_uom_price_ids.length">
+                        <i  t-on-click.stop="() => this.ProductUomMultiButton(line)"
+                            class="text-success fa fa-balance-scale fa-lg line-lot-icon ms-1"
+                            aria-label="Udm."
+                            role="img"
+                            title="Multi Udm."
+                        />
+                    </t>
+                </t>
+            </t>
+        </xpath>
+    </t>
+</templates>

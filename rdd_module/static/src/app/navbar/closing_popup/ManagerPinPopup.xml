@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    
+
+    <t t-name="rdd_module.ManagerPinPopup">
+        <div class="manager-pin-popup">
+            <div class="popup-body">
+                <label>Ingrese el PIN del gerente:</label>
+                <input type="password" t-ref="pinInput" t-model="state.pin" class="form-control"/>
+            </div>
+            <div class="popup-footer">
+                <button class="btn btn-primary" t-on-click="confirm">Confirmar</button>
+                <button class="btn btn-secondary" t-on-click="cancel">Cancelar</button>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,95 @@
+<section class="oe_container" style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; padding: 40px 0; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #1A2980 0%, #26D0CE 100%); padding: 50px 20px; text-align: center; color: white; border-radius: 12px 12px 0 0; margin-top: -40px;">
+        <h1 style="font-size: 42px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+            Mejoras de Impresión y Control de QR (PDV)
+        </h1>
+        <p style="font-size: 20px; font-weight: 400; opacity: 0.9; max-width: 800px; margin: 0 auto;">
+            Toma el control absoluto de tus tickets del Punto de Venta. Elimina el ruido visual, oculta códigos QR cuando no sean necesarios y ahorra papel con un diseño de ticket ultra optimizado.
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div style="padding: 40px; background: white;">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 style="color: #1A2980; font-size: 28px; font-weight: 700; border-bottom: 3px solid #26D0CE; display: inline-block; padding-bottom: 5px; margin-bottom: 30px;">
+                    Alcances y Funcionalidades
+                </h2>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #26D0CE; transition: transform 0.3s ease;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
+                        📱 Control Individual del QR
+                    </h3>
+                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                        Activa o desactiva la impresión de la URL del QR de forma individual por caja/configuración. Ideal para sucursales o terminales que no requieren emitir factura.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #1A2980; transition: transform 0.3s ease;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
+                        📏 Optimización de Espacios (Ahorro de papel)
+                    </h3>
+                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                        Limpieza profunda del ticket: se eliminan márgenes y saltos de línea innecesarios antes del logo, antes de los productos y en el footer, reduciendo drásticamente el desperdicio de papel.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #e74c3c; transition: transform 0.3s ease;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
+                        🏷️ Limpieza de Etiquetas de IVA
+                    </h3>
+                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                        Oculta dinámicamente las etiquetas de "IVA 0" e "IVA 16" en las líneas impresas del ticket, logrando un listado de productos mucho más limpio y profesional para el cliente.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #f1c40f; transition: transform 0.3s ease;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
+                        🔍 Código Único Resaltado
+                    </h3>
+                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                        El Código Único impreso debajo del QR ahora tiene un formato agrandado y en negrita (1.6em), facilitando su captura y legibilidad visual en entornos rápidos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Scope -->
+        <div class="row">
+            <div class="col-md-12">
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; border: 1px solid #e9ecef;">
+                    <h3 style="color: #343a40; font-weight: 700; font-size: 22px; margin-top: 0; margin-bottom: 15px;">
+                        ⚙️ Impacto Técnico y Código
+                    </h3>
+                    <ul style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 0;">
+                        <li><b>Backend:</b> Herencia en el modelo <code>pos.config</code> para añadir el campo <code>not_print_qr_url</code> y hacerlo disponible en la sesión de caja.</li>
+                        <li><b>JS (OWL):</b> Parche (Monkey Patch) sobre <code>export_for_printing</code> en <code>PosOrder</code> para inyectar la lógica del QR basada en la configuración sin romper el core.</li>
+                        <li><b>XML (QWeb):</b> Herencia e inyección vía <code>xpath</code> en <code>point_of_sale.OrderReceipt</code> y <code>point_of_sale.ReceiptHeader</code> para remover nodos <code>&lt;br/&gt;</code> conflictivos y reestructurar paddings base.</li>
+                        <li><b>XML (QWeb):</b> Extensión de <code>point_of_sale.Orderline</code> inyectando clases utilitarias de Bootstrap (<code>d-none</code>) y estilos en línea con alta prioridad para ocultar las etiquetas de grupo de impuestos directamente en las líneas del ticket.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Stats -->
+    <div style="background: #111; padding: 30px; text-align: center; color: white; border-radius: 0 0 12px 12px;">
+        <p style="font-size: 18px; margin: 0; font-weight: 300;">
+            Desarrollado con altos estándares de calidad para Odoo 18 Enterprise.
+        </p>
+        <div style="margin-top: 15px; display: inline-block; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 30px; font-family: monospace; font-size: 16px;">
+            <span style="color: #26D0CE;">Total Lines of Code (TLoC):</span> <b style="color: white; font-size: 20px;">134</b>
+        </div>
+    </div>
+</section>

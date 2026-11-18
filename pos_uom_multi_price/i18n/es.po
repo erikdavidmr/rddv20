@@ -1,0 +1,134 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_uom_multi_price
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 15.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-06-17 16:53+0000\n"
+"PO-Revision-Date: 2022-06-17 16:53+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__category_id
+msgid "Category"
+msgstr "Categoría"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,help:pos_uom_multi_price.field_product_multi_uom_price__category_id
+msgid "Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."
+msgstr "La conversión entre Unidades de Medida solo puede ocurrir si pertenecen a la misma categoría. La conversión se realizará en base a los ratios"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__display_name
+msgid "Display Name"
+msgstr "Nombre"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__id
+msgid "ID"
+msgstr ""
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price____last_update
+msgid "Last Modified on"
+msgstr "Ùltima modificación"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__write_date
+msgid "Last Updated on"
+msgstr "Ultima actualización en"
+
+#. module: pos_uom_multi_price
+#: model:ir.model,name:pos_uom_multi_price.model_pos_order_line
+msgid "Point of Sale Order Lines"
+msgstr "Líneas de Orden de Punto de Venta"
+
+#. module: pos_uom_multi_price
+#: code:addons/pos_uom_multi_price/models/product_multi_uom_price.py:0
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__price
+#, python-format
+msgid "Price"
+msgstr "Precio"
+
+#. module: pos_uom_multi_price
+#: code:addons/pos_uom_multi_price/models/product_multi_uom_price.py:0
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__product_id
+#, python-format
+msgid "Product"
+msgstr "Producto"
+
+#. module: pos_uom_multi_price
+#: model:ir.model,name:pos_uom_multi_price.model_product_template
+msgid "Product Template"
+msgstr "Plantilla de Producto"
+
+#. module: pos_uom_multi_price
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_pos_order_line__product_uom_id
+msgid "Product UoM"
+msgstr "UdM de producto"
+
+#. module: pos_uom_multi_price
+#: model:ir.model,name:pos_uom_multi_price.model_product_multi_uom_price
+msgid "Product multiple uom price"
+msgstr "Multiple unidades de medida"
+
+#. module: pos_uom_multi_price
+#: code:addons/pos_uom_multi_price/models/product_multi_uom_price.py:0
+#: model:ir.model.constraint,message:pos_uom_multi_price.constraint_product_multi_uom_price_product_multi_uom_price_uniq
+#, python-format
+msgid "Product-UOM must be unique and there are duplicates!"
+msgstr "¡Product-UOM debe ser único y hay duplicados!"
+
+#. module: pos_uom_multi_price
+#: model:ir.model,name:pos_uom_multi_price.model_stock_picking
+msgid "Transfer"
+msgstr "Transferir"
+
+#. module: pos_uom_multi_price
+#. openerp-web
+#: code:addons/pos_uom_multi_price/static/src/xml/multi_uom_price.xml:0
+#, python-format
+msgid "UOM"
+msgstr ""
+
+#. module: pos_uom_multi_price
+#: model_terms:ir.ui.view,arch_db:pos_uom_multi_price.product_template_form_view
+msgid "UOM Price"
+msgstr "UOM Precio"
+
+#. module: pos_uom_multi_price
+#: code:addons/pos_uom_multi_price/models/product_template.py:0
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_product__multi_uom_price_ids
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_template__multi_uom_price_ids
+#, python-format
+msgid "UOM price"
+msgstr "UOM Precio"
+
+#. module: pos_uom_multi_price
+#: code:addons/pos_uom_multi_price/models/product_multi_uom_price.py:0
+#: model:ir.model.fields,field_description:pos_uom_multi_price.field_product_multi_uom_price__uom_id
+#, python-format
+msgid "Unit of Measure"
+msgstr "Unidad de Medida"

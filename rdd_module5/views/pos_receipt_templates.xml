@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="pos_order_receipt_qr_visibility" inherit_id="point_of_sale.pos_order_receipt">
+            <xpath expr="//div[@t-if=&quot;conditions['use_self_invoicing'] and order['state'] != 'draft' and not conditions['basic_receipt']&quot;]" position="attributes">
+                <attribute name="t-if">conditions['use_self_invoicing'] and order['state'] != 'draft' and not conditions['basic_receipt'] and not config['not_print_qr_url']</attribute>
+            </xpath>
+        </template>
+    </data>
+</odoo>

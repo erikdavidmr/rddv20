@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    
+    <record id="access_limitacion_pos" model="ir.access">
+        <field name="name">Mostrar solo punto de venta del usuario</field>
+        <field name="model_id" ref="point_of_sale.model_pos_config" />
+        <field name="domain">['|', '|', '|', ('cashier_employee_ids', 'in', user.employee_id.id), ('manager_employee_ids', 'in', user.employee_id.id), ('restrictive_employee_ids', 'in', user.employee_id.id), ('supervised_employee_ids', 'in', user.employee_id.id)]</field>
+        <field name="operation">cru</field><field name="group_id" ref="rdd_module.rdd_point_of_sale_group" /></record>
+
+    
+    <record id="access_limitacion_almacen_type_manager" model="ir.access">
+        <field name="name">LIMITACIÓN DE VISIBILIDAD SEGÚN ALMACÉN PICKING TYPE</field>
+        <field name="model_id" ref="stock.model_stock_picking_type" />
+        <field name="domain">[('warehouse_id.id', 'in', user.user_warehouse.ids)]</field>
+        <field name="operation">cru</field><field name="group_id" ref="rdd_module.rdd_warehouse_user" /></record>
+    <record id="access_limitacion_almacen_picking_manager" model="ir.access">
+        <field name="name">LIMITACIÓN DE VISIBILIDAD SEGÚN ALMACÉN STOCK.PICKING</field>
+        <field name="model_id" ref="stock.model_stock_picking" />
+        <field name="domain">[('picking_type_id.warehouse_id.id', 'in', user.user_warehouse.ids)]</field>
+        <field name="operation">cru</field><field name="group_id" ref="rdd_module.rdd_warehouse_user" /></record>
+    
+    <record id="access_limitacion_almacen_quant_manager" model="ir.access">
+        <field name="name">LIMITACIÓN DE VISIBILIDAD SEGÚN ALMACÉN STOCK.QUANT</field>
+        <field name="model_id" ref="stock.model_stock_quant" />
+        <field name="domain">[('location_id.warehouse_id.id', 'in', user.user_warehouse.ids)]</field>
+        <field name="operation">cru</field><field name="group_id" ref="rdd_module.rdd_warehouse_user" /></record>
+        
+    
+</odoo>

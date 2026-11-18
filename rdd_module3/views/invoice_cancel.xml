@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_l10n_mx_edi_invoice_cancel_form_inherit_pue_ppd" model="ir.ui.view">
+        <field name="name">l10n_mx_edi.invoice.cancel.form.inherit.pue_ppd</field>
+        <field name="model">l10n_mx_edi.invoice.cancel</field>
+        <field name="inherit_id" ref="l10n_mx_edi.l10n_mx_edi_invoice_cancel_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Inserta el flag (oculto) en el form -->
+            <xpath expr="//form" position="inside">
+                <field name="has_substitution_doc" invisible="1"/>
+            </xpath>
+
+            <!-- Tus campos extra: solo cuando mode=ginvoice, se necesita sustitución y
+                 AÚN no existe sustituto -->
+            <xpath expr="//form//group//group/field[@name='periodicity']" position="after">
+                <field name="replacement_global_period_date"
+                       invisible="mode != 'ginvoice' or not need_replacement_invoice_button or has_substitution_doc"
+                       required="mode == 'ginvoice' and need_replacement_invoice_button and not has_substitution_doc"/>
+
+                <field name="replacement_payment_term_id"
+                       invisible="mode != 'ginvoice' or not need_replacement_invoice_button or has_substitution_doc"
+                       required="mode == 'ginvoice' and need_replacement_invoice_button and not has_substitution_doc"/>
+                <field name="replacement_payment_way_id"
+                       invisible="mode != 'ginvoice' or not need_replacement_invoice_button or has_substitution_doc"/>
+                <field name="replacement_emission_datetime"
+                       invisible="mode != 'ginvoice' or not need_replacement_invoice_button or has_substitution_doc"/>
+            </xpath>
+
+            <!-- Botón CREAR SUSTITUCIÓN: ocúltalo si ya existe sustituto -->
+            <xpath expr="//footer/button[@name='action_create_replacement_invoice']" position="attributes">
+                <attribute name="string">Crear factura rectificativa</attribute>
+                <attribute name="invisible">not need_replacement_invoice_button or has_substitution_doc</attribute>
+            </xpath>
+
+            <!-- Botón CONFIRM (cancelación): muéstralo cuando ya exista sustituto -->
+            <xpath expr="//footer/button[@name='action_cancel_invoice']" position="attributes">
+                <attribute name="string">Confirmar Cancelar CFDI</attribute>
+                <attribute name="invisible">need_replacement_invoice_button and not has_substitution_doc</attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

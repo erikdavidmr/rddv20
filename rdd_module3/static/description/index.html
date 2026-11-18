@@ -1,0 +1,225 @@
+<section class="oe_container oe_dark">
+    <div class="col-md-12">
+        <h2 class="oe_slogan" style="font-size: 34px;color:#2C0091;">
+            <b>POS: Factura Global Cliente (México)</b>
+        </h2>
+        <h3 class="oe_slogan" style="font-size: 18px;color:#148963;">
+            Emite <b>CFDI Global</b> desde POS, crea una <b>Factura Global Cliente</b> (factura espejo) ligada a las órdenes,
+            y soporta <b>cancelación con sustitución</b> usando <b>Relación 04</b> (UUID origen).
+            <br/>
+            <b>Política del módulo:</b> <u>nunca se consideran reembolsos/negativos</u> en ningún flujo de consolidación o timbrado.
+        </h3>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">Descripción general</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+            <p>
+                Este módulo extiende el flujo estándar de <b>Factura Global</b> de México (<b>l10n_mx_edi</b>) para Punto de Venta (POS),
+                agregando control de <b>periodo global</b>, <b>fecha/hora de emisión</b>, <b>factura espejo</b> y un flujo robusto de
+                <b>cancelación con sustitución</b> sin duplicidades.
+            </p>
+
+            <div class="alert alert-info" style="margin-top:10px;">
+                <b>Concepto clave:</b>
+                <ul style="margin-bottom:0;">
+                    <li>
+                        <b>Periodo global (mes/año)</b> se usa para <code>&lt;cfdi:InformacionGlobal Meses/Año&gt;</code>
+                        (siempre se fuerza al día 1 del mes).
+                    </li>
+                    <li>
+                        <b>Fecha/hora de emisión</b> se usa para <code>Comprobante@Fecha</code> (reglas: <b>no futura</b> y <b>máximo 72h hacia atrás</b>).
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">¿Qué hace este módulo?</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+            <ul>
+                <li>
+                    <b>Timbrado CFDI Global (POS)</b> con nodo <b>InformaciónGlobal</b>:
+                    <code>Periodicidad</code> + <code>Meses</code> + <code>Año</code>.
+                </li>
+                <li>
+                    <b>Factura espejo tipo cliente</b> (<code>account.move</code>) creada automáticamente al timbrar el global <u>solo en emisión original</u>.
+                </li>
+                <li>
+                    <b>Vinculación y trazabilidad</b>: órdenes POS quedan ligadas a la factura espejo (<code>pos.order.global_invoice_id</code>).
+                </li>
+                <li>
+                    <b>Cancelación con sustitución (Motivo 01)</b>:
+                    <ul>
+                        <li>Crea una factura sustituta en <b>borrador</b> con <code>CFDI Origen = 04|UUID</code>.</li>
+                        <li>El usuario timbra la sustituta desde la factura.</li>
+                        <li>Después, se confirma la cancelación del CFDI original en el wizard.</li>
+                    </ul>
+                </li>
+                <li>
+                    <b>Blindaje SAT / estabilidad técnica</b>:
+                    <ul>
+                        <li>Evita errores tipo <b>singleton</b> al cancelar/actualizar estado SAT agrupando por attachment.</li>
+                        <li>Respeta el pipeline EDI para construir líneas <b>idénticas al XML</b>.</li>
+                    </ul>
+                </li>
+                <li>
+                    <b>Política de datos</b>: <u>NO reembolsos</u> y <u>NO negativos</u>. Si se detectan, el flujo se detiene con error.
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">Reglas del módulo (importante)</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+            <ul>
+                <li><b>Reembolsos / negativos:</b> <u>prohibidos</u> en consolidación y timbrado. Se excluyen órdenes refund y se bloquean líneas negativas huérfanas.</li>
+                <li><b>Periodo global:</b> se fuerza al día 1 (ej. 2026-03-01) para cumplir con <code>InformaciónGlobal</code>.</li>
+                <li><b>Fecha/hora de emisión:</b> no puede ser futura y no puede exceder 72 horas hacia atrás.</li>
+                <li>
+                    <b>Idempotencia de sustitución (04):</b>
+                    <ul>
+                        <li>Si existe sustituta en <b>Borrador</b> → se <b>reusa</b> (se actualiza desde el wizard y se abre).</li>
+                        <li>Si existe sustituta en <b>Aprobada/Posted</b> → se <b>bloquea</b> y se muestra alerta (no se crea otra).</li>
+                        <li>Si existe sustituta <b>Cancelada</b> → se permite crear una nueva en borrador.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="alert alert-warning" style="margin-top:10px;">
+                <b>Nota SAT:</b> Para cancelar con <b>Motivo 01</b>, primero debe existir el <b>UUID del sustituto</b>.
+                Por eso el flujo es: <b>Crear borrador → Timbrar sustituto → Cancelar original</b>.
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">Manual de uso</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+
+            <h3 style="color:#2C0091;"><b>A) Emitir CFDI Global (emisión original)</b></h3>
+            <ol>
+                <li>En POS, genera ventas normalmente.</li>
+                <li>Ejecuta el proceso de <b>Factura Global</b> (wizard México).</li>
+                <li>Llena estos campos:</li>
+                <ul>
+                    <li><b>Periodo global (mes/año)</b> (obligatorio recomendado): se usa en <code>InformaciónGlobal</code>.</li>
+                    <li><b>Fecha/hora de emisión</b> (opcional): controla <code>Comprobante@Fecha</code> (máx. 72h / no futura).</li>
+                </ul>
+                <li>Timbrar CFDI Global.</li>
+                <li>Al timbrar, el módulo crea la <b>Factura Global Cliente</b> (factura espejo) y liga las órdenes POS.</li>
+            </ol>
+
+            <h3 style="color:#2C0091;"><b>B) Ver la Factura Global Cliente</b></h3>
+            <ul>
+                <li>Desde la orden POS: campo/smart access <b>Factura Global Cliente</b> (abre la factura ligada).</li>
+                <li>Desde Contabilidad → Facturas: identifica facturas con marcas globales (p. ej. <code>x_is_global_pdv</code>).</li>
+            </ul>
+
+            <h3 style="color:#2C0091;"><b>C) Cancelación con sustitución (Motivo 01 + Relación 04)</b></h3>
+            <ol>
+                <li>Abre el CFDI global original y entra al <b>wizard de cancelación</b>.</li>
+                <li>Selecciona <b>Motivo 01</b> (Comprobantes emitidos con errores con relación).</li>
+                <li>Haz clic en <b>Crear factura sustituta</b>:</li>
+                <ul>
+                    <li>El sistema crea (o reusa) una factura en <b>borrador</b> con <code>CFDI Origen = 04|UUID</code>.</li>
+                    <li><b>NO timbra</b> en ese momento (solo prepara el borrador).</li>
+                </ul>
+                <li>En la factura sustituta (borrador), timbra normalmente (esto genera el UUID del sustituto).</li>
+                <li>Regresa al CFDI original y vuelve a abrir el wizard de cancelación:</li>
+                <ul>
+                    <li>Si ya existe sustituto timbrado, el wizard detecta <b>Tiene CFDI sustituto</b> y <b>oculta campos de periodo/fecha</b>.</li>
+                    <li>Solo debes confirmar la cancelación con <b>Motivo 01</b>.</li>
+                </ul>
+            </ol>
+
+            <div class="alert alert-info" style="margin-top:10px;">
+                <b>¿Qué campos se llenan en reemplazo?</b><br/>
+                En el paso de <b>crear borrador sustituto</b> puedes definir:
+                <ul style="margin-bottom:0;">
+                    <li><b>Periodo global (mes/año)</b> del sustituto (InformaciónGlobal).</li>
+                    <li><b>Fecha/hora de emisión</b> del sustituto (Comprobante@Fecha).</li>
+                    <li><b>Forma de pago</b> y/o <b>Términos de pago</b> del sustituto (según tu política PUE/PPD).</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">Campos técnicos relevantes</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+            <ul>
+                <li><code>pos.order.global_invoice_id</code>: liga órdenes POS → Factura Global Cliente.</li>
+                <li><code>account.move.l10n_mx_edi_cfdi_origin</code>: en sustitución queda <code>04|UUID</code>.</li>
+                <li><code>x_is_global_pdv</code>, <code>x_global_periodicity</code>, <code>x_global_period_date</code>, <code>x_cfdi_emission_datetime</code>.</li>
+                <li><code>l10n_mx_edi_payment_method_id</code>: forma de pago SAT (se toma por mayoría o 99).</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">Troubleshooting</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+            <ul>
+                <li><b>Error por Fecha/hora de emisión:</b> no puede ser futura y debe estar dentro de 72 horas hacia atrás.</li>
+                <li><b>Órdenes con reembolsos/negativos:</b> el módulo las excluye y/o detiene el proceso por política.</li>
+                <li><b>No se encontró “Factura Global PDV”:</b> crea el diario con ese nombre en la compañía.</li>
+                <li><b>Sustituta en Posted:</b> el flujo se bloquea y pide regresar a borrador si necesitas modificarla.</li>
+                <li><b>Periodo incorrecto:</b> valida el <b>Periodo global (mes/año)</b> usado para <code>InformaciónGlobal</code>.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">¿Dónde lo encuentro?</h2>
+        <div class="col-sm-10 col-sm-offset-1" style="font-size: 15px;">
+            <ul>
+                <li><b>POS → Órdenes</b>: acceso a la <b>Factura Global Cliente</b> ligada.</li>
+                <li><b>Contabilidad → Facturas</b>: facturas globales / sustitutas por <code>CFDI Origen</code>.</li>
+                <li><b>Wizard Factura Global (MX)</b>: captura <b>Periodo global</b> y <b>Fecha/hora de emisión</b>.</li>
+                <li><b>Wizard Cancelación CFDI</b>: motivo 01 y creación/uso de sustituto.</li>
+            </ul>
+
+            <div class="alert alert-warning" style="margin-top:10px;">
+                <b>Requisitos:</b>
+                <ul style="margin-bottom:0;">
+                    <li>Diario <code>Factura Global PDV</code> configurado en la compañía.</li>
+                    <li>Partner genérico <b>GLOBAL PDV</b> (por XML/data).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:olive;">Soporte</h2>
+        <div class="oe_slogan text-center">
+            <p style="font-size: 15px;">
+                Si necesitas extender este flujo (reportes por periodo, reglas por sucursal, automatización contable),
+                podemos seguir iterando con pruebas reales de timbrado/cancelación.
+            </p>
+            <h3>Email: <a href="mailto:soporte@tudominio.com">soporte@tudominio.com</a></h3>
+        </div>
+    </div>
+</section>
+
+<hr style="width: 100%;height: 4px;background: #148963;margin: 0px 0px;">
+<hr style="width: 100%;height: 4px;background: #2C0091;margin: 0px 0px;">

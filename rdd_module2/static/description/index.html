@@ -1,0 +1,71 @@
+<section class="oe_container" style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; padding: 40px 0; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); padding: 50px 20px; text-align: center; color: white; border-radius: 12px 12px 0 0; margin-top: -40px;">
+        <h1 style="font-size: 42px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+            Reporte de Precios de Productos con Impuestos
+        </h1>
+        <p style="font-size: 20px; font-weight: 400; opacity: 0.9; max-width: 800px; margin: 0 auto;">
+            Una solución elegante y nativa para que los reportes de listas de precio impriman los precios netos (con impuestos incluidos) tanto en vistas web HTML como en documentos PDF generados.
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div style="padding: 40px; background: white;">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 style="color: #FF416C; font-size: 28px; font-weight: 700; border-bottom: 3px solid #FF4B2B; display: inline-block; padding-bottom: 5px; margin-bottom: 30px;">
+                    Alcances y Funcionalidades
+                </h2>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #FF4B2B; transition: transform 0.3s ease;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
+                        📄 Impresión de PDF Impecable
+                    </h3>
+                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                        Garantiza que al presionar "Imprimir" en el catálogo de productos, el documento PDF descargable contenga el precio comercial real (con IVA/IEPS), en lugar de la base sin impuestos por defecto de Odoo.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #2ecc71; transition: transform 0.3s ease;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
+                        ⚡ Inyección Nativa Directa
+                    </h3>
+                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
+                        Evita parches visuales en el front-end. Los impuestos se pre-calculan en el núcleo del generador del reporte e inyectan en las plantillas de Odoo directamente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Scope -->
+        <div class="row">
+            <div class="col-md-12">
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; border: 1px solid #e9ecef;">
+                    <h3 style="color: #343a40; font-weight: 700; font-size: 22px; margin-top: 0; margin-bottom: 15px;">
+                        ⚙️ Impacto Técnico y Código
+                    </h3>
+                    <ul style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 0;">
+                        <li><b>Backend Sólido:</b> Sobreescritura del método <code>_get_report_data</code> en el modelo abstracto <code>report.product.report_pricelist</code>.</li>
+                        <li><b>Precisión Contable:</b> Hace uso del motor <code>taxes.compute_all()</code> de Odoo y respeta las tasas de impuestos y monedas de la compañía en tiempo real.</li>
+                        <li><b>Arquitectura Minimalista:</b> La sobreescritura nativa del diccionario de precios elimina completamente la necesidad de crear archivos QWeb XML parcheados o controladores OWL de Javascript.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Stats -->
+    <div style="background: #111; padding: 30px; text-align: center; color: white; border-radius: 0 0 12px 12px;">
+        <p style="font-size: 18px; margin: 0; font-weight: 300;">
+            Desarrollado con arquitectura minimalista para Odoo 18 Enterprise.
+        </p>
+        <div style="margin-top: 15px; display: inline-block; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 30px; font-family: monospace; font-size: 16px;">
+            <span style="color: #FF416C;">Total Lines of Code (TLoC):</span> <b style="color: white; font-size: 20px;">46</b>
+        </div>
+    </div>
+</section>

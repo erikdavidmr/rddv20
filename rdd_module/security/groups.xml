@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+        <record id="rdd_point_of_sale_category" model="ir.module.category">
+            <field name="name">Restringir Puntos de venta por usuario</field>
+            <field name="sequence">22</field>
+        </record>
+
+        <record id="privilege_rdd_point_of_sale_category" model="res.groups.privilege"><field name="name">Point Of Sale</field><field name="category_id" ref="rdd_point_of_sale_category" /></record><record id="rdd_point_of_sale_group" model="res.groups">
+            <field name="name">Si</field>
+            <field name="comment">Al activarse restringe a este usuario a sus puntos de venta permitidos</field>
+            <field name="privilege_id" ref="privilege_rdd_point_of_sale_category" />
+        </record>
+        
+        <record id="rdd_warehouse_group" model="ir.module.category">
+            <field name="name">Permisos de Almacen</field>
+            <field name="sequence">22</field>
+        </record>
+
+        <record id="privilege_rdd_warehouse_group" model="res.groups.privilege"><field name="name">Warehouse Group</field><field name="category_id" ref="rdd_warehouse_group" /></record><record id="rdd_warehouse_admin" model="res.groups">
+            <field name="name">Almacén Admin</field>
+            <field name="comment">Permisos para visualizar todos los almacenes</field>
+            <field name="privilege_id" ref="privilege_rdd_warehouse_group" />
+        </record>
+        
+        <record id="rdd_warehouse_user" model="res.groups">
+            <field name="name">Almacén Usuario</field>
+            <field name="comment">Permisos para visualizar solo almacenes permitidos</field>
+            <field name="privilege_id" ref="privilege_rdd_warehouse_group" />
+        </record>
+
+        
+         <record id="rdd_product_puc_category" model="ir.module.category">
+            <field name="name">Acceso al campo puc de producto?</field>
+            <field name="sequence">24</field>
+        </record>
+
+        <record id="privilege_rdd_product_puc_category" model="res.groups.privilege"><field name="name">Product Puc</field><field name="category_id" ref="rdd_product_puc_category" /></record><record id="rdd_product_puc_group" model="res.groups">
+            <field name="name">Si</field>
+            <field name="comment">Al activarse da acceso de edicion en los campos puc en producto</field>
+            <field name="privilege_id" ref="privilege_rdd_product_puc_category" />
+        </record>
+        
+        
+        
+         <record id="rdd_especial_pdv_category" model="ir.module.category">
+            <field name="name">Permisos especiales PDV RDD</field>
+            <field name="sequence">24</field>
+        </record>
+
+        <record id="privilege_rdd_especial_pdv_category" model="res.groups.privilege"><field name="name">Especial Pdv</field><field name="category_id" ref="rdd_especial_pdv_category" /></record><record id="rdd_especial_pdv_group" model="res.groups">
+            <field name="name">Si</field>
+            <field name="comment">Al activarse da acceso a los apartados de Ordenes: Ordenes y Pagos. PDV Sesiones: Pagos y Ordenes. Balance de cierre teorico</field>
+            <field name="privilege_id" ref="privilege_rdd_especial_pdv_category" />
+        </record>
+    </data>
+</odoo>

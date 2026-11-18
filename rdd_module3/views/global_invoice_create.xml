@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_l10n_mx_edi_global_invoice_create_form_inherit_emission_dt" model="ir.ui.view">
+    <field name="name">l10n_mx_edi.global_invoice.create.form.inherit.emission_dt</field>
+    <field name="model">l10n_mx_edi.global_invoice.create</field>
+    <field name="inherit_id" ref="l10n_mx_edi.l10n_mx_edi_global_invoice_create_form"/>
+    <field name="arch" type="xml">
+      <!-- Insertar después de Periodicidad -->
+      <xpath expr="//field[@name='periodicity']" position="after">
+        <field name="global_period_date"/>
+        <field name="emission_datetime"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

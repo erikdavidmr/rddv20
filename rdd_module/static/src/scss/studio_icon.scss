@@ -1,0 +1,5 @@
+// The Odoo UI icon font exposes Studio as the private-use glyph U+E813.
+// The webclient's data-icon ligature currently falls back to the literal text.
+.o_web_studio_navbar_item .oi[data-icon="oi_studio"]::before {
+    content: "\e813";
+}

@@ -1,0 +1,3 @@
+id,name,model_id,group_id/id,operation,domain
+access_pos_manager_approval_m,approval.manager,manager.approval,,crud,
+access_pos_manager_approval_u,approval.user,manager.approval,,crud,

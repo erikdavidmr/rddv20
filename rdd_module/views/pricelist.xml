@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+
+        <record id="product_pricelist_view_inherit_form" model="ir.ui.view">
+            <field name="name">product.pricelist.view.inherit.form</field>
+            <field name="model">product.pricelist</field>
+            <field name="inherit_id" ref="product.product_pricelist_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page name="cron_parameters" string="Parametros">
+                        <group>
+                            <field name="days_apply_m2m" widget="many2many_tags"/>
+                            <field name="sales_team" widget="many2many_tags"/>
+                            <field name="expire_date" />
+                        </group>
+                    </page>
+                    
+                </xpath>
+                
+               
+            </field>
+        </record>
+        
+        <record id="product_pricelist_item_inherit_form" model="ir.ui.view">
+            <field name="name">product.pricelist.view.item.inherit.form</field>
+            <field name="model">product.pricelist.item</field>
+            <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='price_discount']" position="before">
+                    <label for="markup_rdd" invisible="base != 'standard_price'"/>
+                    <div class="o_row" invisible="base != 'standard_price'" style="width: 40% !important;">
+                        <field name="markup_rdd"/>
+                        <span>%</span>
+                    </div>
+                </xpath>
+                
+               
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_rdd_inherit" model="ir.ui.view">
+        <field name="name">prouct.template.rdd.form.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='standard_price_uom']" position="after">
+                <field name="puc_group"/>
+                <!--label for="puc_edit"/>
+                <div
+                    name="puc_div"
+                >
+                    
+                    <field name="puc_edit" readonly="not puc_group" />
+                    
+                    
+                </div>
+                <label for="puc_field"/>
+                <div
+                    name="puc_div_2"
+                >
+                    
+                    <field
+                        name="puc_field"
+                        class="oe_inline"
+                        widget="monetary"
+                        options="{
+                            'currency_field': 'cost_currency_id',
+                            'field_digits': True,
+                        }" readonly="not puc_edit or not puc_group"
+                    /> <button string="Actualizar"
+                        name="get_puc_value" icon="fa-refresh"
+                        type="object" invisible="puc_edit"/>
+                    
+                </div-->
+                
+                <label for="puc_multicompany_edit"/>
+                <div
+                    name="puc_div"
+                >
+                    
+                    <field name="puc_multicompany_edit" readonly="not puc_group" />
+                    
+                    
+                </div>
+                <label for="puc_multicompany"/>
+                <div
+                    name="puc_div_4"
+                >
+                    
+                    <field
+                        name="puc_multicompany"
+                        class="oe_inline"
+                        widget="monetary"
+                        options="{
+                            'currency_field': 'cost_currency_id',
+                            'field_digits': True,
+                        }" 
+                    /> 
+                    
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+
+</odoo>

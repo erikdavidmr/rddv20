@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Override OrderReceipt to remove extra spaces and enlarge unique code -->
+    <t t-name="rdd_module5.OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <!-- Remove top padding (space before logo) -->
+        <xpath expr="//div[hasclass('pos-receipt')]" position="attributes">
+            <attribute name="class">pos-receipt px-2 pb-2 pt-0 mt-0</attribute>
+        </xpath>
+
+        <!-- Remove footer extra spaces -->
+        <xpath expr="//div[@t-if='props.data.footer']" position="replace">
+            <div t-if="props.data.footer" class="pos-receipt-center-align mt-2 mb-2" style="white-space:pre-line">
+                <t t-esc="props.data.footer" />
+            </div>
+        </xpath>
+
+        <!-- Remove <br/> after after-footer -->
+        <xpath expr="//div[@class='after-footer']/following-sibling::br[1]" position="replace"/>
+
+        <!-- Remove <br/> before Powered by Odoo -->
+        <xpath expr="//div[p[text()='Powered by Odoo']]/preceding-sibling::br[1]" position="replace"/>
+
+        <!-- Remove <br/> before QR code text (Need an invoice for your purchase ?) -->
+        <xpath expr="//div[@t-if='props.data.pos_qr_code']/br" position="replace"/>
+
+        <!-- Enlarge Unique Code under QR -->
+        <xpath expr="//div[hasclass('unique-code')]" position="attributes">
+            <attribute name="style">font-size: 1.6em; font-weight: bold; text-align: center; padding-top: 5px; padding-bottom: 5px;</attribute>
+        </xpath>
+
+        <!-- Hide 'en $ amount' from tax breakdown robustly -->
+        <xpath expr="//span[@t-esc='tax_group.group_name']/following-sibling::t" position="replace"/>
+    </t>
+
+    <!-- Override Orderline to hide tax labels (IVA 0 / IVA 16) in printed lines -->
+    <t t-name="rdd_module5.Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//div[@t-if='props.showTaxGroupLabels']" position="attributes">
+            <attribute name="class">text-end d-none</attribute>
+            <attribute name="style">display: none !important;</attribute>
+        </xpath>
+    </t>
+
+    <!-- Override ReceiptHeader to remove spaces -->
+    <t t-name="rdd_module5.ReceiptHeader" t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
+        <!-- Force remove the trailing <br /> at the end of the header -->
+        <xpath expr="//br[last()]" position="replace"/>
+        <!-- Force remove the <br/> after the logo -->
+        <xpath expr="//img[hasclass('pos-receipt-logo')]/following-sibling::br[1]" position="replace"/>
+        
+        <!-- Tighten tracking number line-height and margin drastically -->
+        <xpath expr="//div[@t-if='props.data.trackingNumber and !props.data.bigTrackingNumber']" position="attributes">
+            <attribute name="style">line-height: 0.8; margin-bottom: -15px !important;</attribute>
+        </xpath>
+    </t>
+
+</templates>

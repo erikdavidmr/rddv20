@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Partner: GLOBAL PDV -->
+    <record id="res_partner_global_pdv" model="res.partner">
+        <field name="name">GLOBAL PDV</field>
+        <field name="is_company">True</field>
+    </record>
+
+    <!-- Producto: POS Venta Consolidada -->
+    <record id="product_product_global_pdv" model="product.product">
+        <field name="name">POS Venta Consolidada</field>
+        <field name="default_code">POS-GLOBAL</field>
+        <field name="type">service</field>
+        <field name="sale_ok">True</field>
+        <field name="purchase_ok">False</field>
+        <field name="invoice_policy">order</field>
+        <field name="list_price">0.0</field>
+        <field name="taxes_id" eval="[(6, 0, [])]"/> <!-- Asumimos sin impuestos por defecto -->
+    </record>
+</odoo>

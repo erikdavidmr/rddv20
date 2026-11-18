@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_pos_config_form_inherit-not_qr" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.point_of_sale.not_qr</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//block[@id='pos_bills_and_receipts_section']" position="inside">
+                    <setting id="not_print_qr_url"
+                        help="Desabilita la impresión del código QR ">
+                        <field name="is_not_print_qr_url" />
+                    </setting>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

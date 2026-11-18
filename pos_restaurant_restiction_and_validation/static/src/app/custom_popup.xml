@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template id="popup_manager_select_content" xml:space="preserve">
+    <t t-name="pos_restaurant_restiction_and_validation.ManagerSelectPopup" owl="json">
+        <div class="popup number-popup">
+            <header class="title">
+                <t t-esc="props.title"/>
+            </header>
+            <main class="body">
+                <p t-if="props.body">
+                    <t t-esc="props.body" />
+                </p>
+                <div class="manager-select-container">
+                    <label for="manager-select" class="label">Select Manager:</label>
+                    <select id="manager-select" t-ref="managerSelect" t-on-change="onManagerChange" class="selection-list">
+                        <t t-foreach="props.managers" t-as="manager" t-key="manager.id">
+                            <option t-att-value="manager.id" t-esc="manager.name" t-att-selected="state.selectedManagerId === manager.id"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="pin-input-container">
+                    <label for="manager-pin" class="label">Manager PIN:</label>
+                    <input
+       type="password"
+       id="manager-pin"
+       t-ref="pinInput"
+       t-model="state.pin"
+                                       t-on-input="onPinChange"
+       placeholder="Enter PIN"
+      />
+                </div>
+                <div class="error" t-if="errorMessage">
+                    <t t-esc="errorMessage" />
+                </div>
+            </main>
+            <footer class="footer">
+                <div class="btn btn-primary" t-on-click="confirm">
+      Confirm
+     </div>
+                <!--div class="button cancel" t-on-click="cancel">
+      Cancel
+     </div-->
+            </footer>
+        </div>
+    </t>
+</template>

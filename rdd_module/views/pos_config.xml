@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_config_form_rdd_inherit" model="ir.ui.view">
+        <field name="name">pos.config.rdd.form.inherit</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='other_devices']" position="after">
+                <setting id="prefijo_sufijo" string="Configuracion Sequencia de factura global" help="Configurar sufijo y prefijo para la factura global">
+                    
+                    <div class="row">
+                        <div class="col-lg-4 o_light_label">
+                            <label string="Sufijo" for="suffix"/>
+                        </div>
+                        <div class="col-lg-8">
+                            <field name="suffix"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4 o_light_label">
+                            <label string="Prefijo" for="prefix"/>
+                        </div>
+                        <div class="col-lg-8">
+                            <field name="prefix"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+
+        </field>
+    </record>
+    
+    <record id="view_pos_session_form_rdd_inherit" model="ir.ui.view">
+        <field name="name">pos.session.rdd.form.inherit</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_view_order']" position="attributes">
+                <attribute name="groups">rdd_module.rdd_especial_pdv_group</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_show_payments_list']" position="attributes">
+                <attribute name="groups">rdd_module.rdd_especial_pdv_group</attribute>
+            </xpath>
+
+        </field>
+    </record>
+    
+    <record id="point_of_sale.menu_point_ofsale" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('rdd_especial_pdv_group')])]"/>
+    </record>
+    <record id="point_of_sale.menu_pos_payment" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('rdd_especial_pdv_group')])]"/>
+    </record>
+
+</odoo>

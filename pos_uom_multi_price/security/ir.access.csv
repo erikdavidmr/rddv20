@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_product_multi_uom_price_user,product.multi.uom.price pos user,product.multi.uom.price,point_of_sale.group_pos_user,r,
+access_product_multi_uom_price_manager,product.multi.uom.price pos manager,product.multi.uom.price,point_of_sale.group_pos_manager,crud,
+access_product_multi_uom_price_all,product.multi.uom.price all,product.multi.uom.price,,r,

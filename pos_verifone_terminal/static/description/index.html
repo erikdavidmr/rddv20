@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>POS: Integración Terminal Verifone vía Middleware</title>
+</head>
+<body>
+<div class="document">
+    <h1>POS: Integración Terminal Verifone vía Middleware</h1>
+
+    <p>
+        <img alt="Licencia AGPL-3" src="https://img.shields.io/badge/license-AGPL--3-blue.svg" />
+        <img alt="Versión" src="https://img.shields.io/badge/version-18.0-green.svg" />
+    </p>
+
+    <p>Este módulo permite que el Punto de Venta de Odoo se comunique con una terminal de pago Verifone usando un <strong>middleware sobre IP</strong>.</p>
+
+    <h2>Características</h2>
+    <ul>
+        <li>Envío automático del monto a pagar desde el POS a la terminal Verifone.</li>
+        <li>Recepción del resultado (aprobado/rechazado) mediante webhook.</li>
+        <li>Actualización automática del estado de pago en Odoo POS.</li>
+        <li>Soporte para múltiples terminales mediante configuración por método de pago.</li>
+    </ul>
+
+    <h2>Configuración en Odoo</h2>
+    <ol>
+        <li>Ve a <strong>Punto de Venta &gt; Configuración &gt; Métodos de Pago</strong>.</li>
+        <li>En un método de pago de tipo tarjeta, selecciona un diario de tipo <strong>Bancario</strong>.</li>
+        <li>En el campo <strong>Terminal de pago</strong>, selecciona: <strong>Verifone Terminal (LAN Middleware)</strong>.</li>
+        <li>Completa los campos:
+            <ul>
+                <li><strong>Verifone Middleware IP:</strong> IP local o pública del servicio middleware.</li>
+                <li><strong>Verifone Middleware Port:</strong> Puerto TCP abierto (por defecto 5000).</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>Configuración del parámetro de seguridad</h3>
+    <p>
+        En <strong>Ajustes &gt; Parámetros Técnicos &gt; Parámetros del sistema</strong> agrega:
+        <ul>
+            <li><strong>Clave:</strong> <code>verifone.webhook.token</code></li>
+            <li><strong>Valor:</strong> <code>123456789</code> (o el token que desees)</li>
+        </ul>
+    </p>
+
+    <h2>Configuración del Middleware</h2>
+    <p>
+        El middleware es un servicio HTTP que debe estar instalado y ejecutándose en una máquina con Windows o Linux accesible desde el servidor Odoo.
+    </p>
+    <ul>
+        <li>El middleware escucha POST en <code>/pay</code> para recibir los datos desde el POS.</li>
+        <li>Después de procesar el pago en la terminal física, el middleware envía el resultado a Odoo mediante el webhook <code>/verifone/webhook_pago</code>.</li>
+        <li>La URL del webhook y el token deben coincidir con los configurados en Odoo.</li>
+    </ul>
+
+    <h3>Archivo de configuración ejemplo (mock_verifone_middleware.py)</h3>
+    <pre><code>ODOO_WEBHOOK_URL = "http://tu-odoo.com/verifone/webhook_pago"
+VERIFONE_TOKEN = "123456789"</code></pre>
+
+    <h2>Requisitos de red</h2>
+    <ul>
+        <li>El middleware debe tener acceso de red al servidor de Odoo (y viceversa).</li>
+        <li>Si Odoo está en la nube y el middleware en una red local, se requiere redireccionamiento de puertos.</li>
+    </ul>
+
+    <h2>Detalles Técnicos</h2>
+
+    <h3>Datos enviados desde Odoo POS al middleware</h3>
+    <p>Odoo envía al middleware una petición <code>POST</code> con el siguiente JSON:</p>
+    <pre><code>{
+  "amount": 123.45,
+  "reference": "POS/2025/0012",
+  "pos_id": "Caja 1",
+  "LocalPaymentID": "POS/2025/0012",
+  "InvoiceID": "POS/2025/0012",
+  "Lane": "Caja 1",
+  "Venue": "Caja 1",
+  "paymentline_uuid": "c0a80123-4567-890a-bcde-000000000000",
+  "merchant_order_id": "2025-05-23T10:32:00Z--42--c0a80123-4567-890a-bcde-000000000000",
+  "external_reference": "42_10_c0a80123-4567-890a-bcde-000000000000"
+}</code></pre>
+
+    <h3>Respuesta esperada desde el middleware (Webhook)</h3>
+    <p>El middleware debe enviar el resultado a Odoo con este JSON:</p>
+    <pre><code>{
+  "InvoiceID": "POS/2025/0012",
+  "LocalPaymentID": "POS/2025/0012",
+  "amount": 123.45,
+  "status": "approved",
+  "card_type": "Visa",
+  "merchant_order_id": "2025-05-23T10:32:00Z--42--c0a80123-4567-890a-bcde-000000000000",
+  "paymentline_uuid": "c0a80123-4567-890a-bcde-000000000000",
+  "auth_code": "TX123456789",
+  "external_reference": "42_10_c0a80123-4567-890a-bcde-000000000000"
+}</code></pre>
+
+    <h2>Autor</h2>
+    <ul><li>Erik MR</li></ul>
+
+    <h2>Repositorio</h2>
+    <p><a href="https://github.com/tu-usuario/pos_verifone_terminal">https://github.com/tu-usuario/pos_verifone_terminal</a></p>
+</div>
+</body>
+</html>
