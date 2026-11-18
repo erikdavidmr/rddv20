@@ -338,7 +338,10 @@ patch(ClosePosPopup.prototype, {
             console.log("[ClosePosPopup] Manager validado, saltando template y procediendo directo al cierre");
 
             // Registrar la aprobación del manager en el backend
-            await this.registerManagerApproval(managerValidationResult);
+            const approvalRegistered = await this.registerManagerApproval(managerValidationResult);
+            if (!approvalRegistered) {
+                return;
+            }
 
             // Ejecutar cierre directamente
             return this.closeSession();
@@ -417,7 +420,7 @@ patch(ClosePosPopup.prototype, {
         return new Promise((resolve) => {
             const currentDate = new Date().toLocaleString();
             const sessionId = this.pos.config.current_session_id?.id || 'Unknown';
-            const cashierName = this.pos.cashier?.name || 'Unknown';
+            const cashierName = this.pos.accessRight.cashier?.name || 'Unknown';
             
             const dialogProps = {
                 title: _t("Session Close Confirmation"),
@@ -442,6 +445,14 @@ patch(ClosePosPopup.prototype, {
     async registerManagerApproval(managerValidationResult) {
         if (this.pos.config.module_pos_hr) {
             console.log("[ClosePosPopup] Registrando aprobación de manager en backend");
+            const cashier = this.pos.accessRight.cashier;
+            if (!cashier?.id) {
+                this.dialog.add(AlertDialog, {
+                    title: _t("Cashier unavailable"),
+                    body: _t("The cashier could not be identified, so the approval was not recorded."),
+                });
+                return false;
+            }
             try {
                 await this.env.services.orm.call(
                     "manager.approval",
@@ -449,14 +460,21 @@ patch(ClosePosPopup.prototype, {
                     [{
                         session_id: this.pos.config.current_session_id.id, 
                         manager: managerValidationResult.manager.id, 
-                        cashier1: this.pos.cashier.id, 
+                        cashier1: cashier.id,
                         state: 'session_close'
                     }]
                 );
                 console.log("[ClosePosPopup] Aprobación registrada exitosamente");
+                return true;
             } catch (error) {
                 console.error("[ClosePosPopup] Error al registrar aprobación:", error);
+                this.dialog.add(AlertDialog, {
+                    title: _t("Approval could not be recorded"),
+                    body: _t("The session remains open because the manager approval could not be recorded."),
+                });
+                return false;
             }
         }
+        return true;
     }
 });

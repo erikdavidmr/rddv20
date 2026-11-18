@@ -142,3 +142,15 @@ class TestManagerApprovalContract(TransactionCase):
         self.assertIn('t-if="this.pos.config.cash_control"', template)
         self.assertIn('t-if="this.props.opening_notes"', template)
         self.assertIn('t-model.proxy="this.state.notes"', template)
+
+    def test_session_close_audit_uses_odoo_20_active_cashier(self):
+        source = (
+            Path(__file__).parents[1]
+            / "static/src/app/session_close_by_manager.js"
+        ).read_text()
+        self.assertIn("const cashier = this.pos.accessRight.cashier", source)
+        self.assertIn("cashier1: cashier.id", source)
+        self.assertNotIn("this.pos.cashier.id", source)
+        self.assertNotIn("this.pos.cashier?.name", source)
+        self.assertIn("const approvalRegistered = await this.registerManagerApproval", source)
+        self.assertIn("if (!approvalRegistered)", source)
