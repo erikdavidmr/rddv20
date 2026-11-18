@@ -47,3 +47,25 @@ class TestManagerApprovalContract(TransactionCase):
             self.assertIn(api, source)
         for legacy_api in ("get_order()", "get_selected_orderline()", "get_product()", "get_orderlines()"):
             self.assertNotIn(legacy_api, source)
+
+    def test_manager_approval_uses_odoo_20_employee_roles_and_hashed_pins(self):
+        addon = Path(__file__).parents[1]
+        active_scripts = (
+            "static/src/app/decrease_quantity_by_manager.js",
+            "static/src/app/delete_by_manager.js",
+            "static/src/app/session_close_by_manager.js",
+        )
+        for relative_path in active_scripts:
+            source = (addon / relative_path).read_text()
+            self.assertNotIn("advanced_employee_ids", source, relative_path)
+
+        for relative_path in active_scripts:
+            source = (addon / relative_path).read_text()
+            self.assertIn('models["hr.employee"].getAll()', source, relative_path)
+            self.assertIn("manager_employee_ids", source, relative_path)
+            pin_check = "Sha1.hash(this.state.pin)" if relative_path == active_scripts[2] else "Sha1.hash(payload)"
+            self.assertIn(pin_check, source, relative_path)
+        self.assertIn("cashier?._role !== 'cashier'", (addon / active_scripts[0]).read_text())
+        self.assertIn("cashier._role === 'cashier'", (addon / active_scripts[1]).read_text())
+        source = (addon / active_scripts[2]).read_text()
+        self.assertNotIn('"pin"', source)

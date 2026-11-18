@@ -1,4 +1,5 @@
 /*@odoo-module */
+/* global Sha1 */
 
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
@@ -70,7 +71,7 @@ export class ManagerSelectPopup extends Component {
         }
         
         console.log("[ManagerSelectPopup] Validando PIN...");
-        if (selectedManager.pin === this.state.pin) {
+        if (selectedManager._pin && selectedManager._pin === Sha1.hash(this.state.pin)) {
             console.log("[ManagerSelectPopup] PIN correcto, procediendo");
             this.props.onConfirm({ 
                 confirmed: true,
@@ -424,20 +425,18 @@ patch(ClosePosPopup.prototype, {
 
         // Obtener lista de managers
         const configId = this.pos.config.id;
-        const configs = await this.env.services.orm.read("pos.config", [configId], ["advanced_employee_ids"]);
-        const configData = configs.length ? configs[0] : null;
-        const employee_ids = configData?.advanced_employee_ids || [];
+        const employee_ids = this.pos.config.manager_employee_ids || [];
         
         let managers = [];
         if (employee_ids.length) {
-            const employees = await this.env.services.orm.read("hr.employee", employee_ids, ["user_id", "pin", "name"]);
+            const employees = this.pos.models["hr.employee"].getAll().filter((employee) => employee_ids.includes(employee.id));
             managers = employees
-                .filter(e => e.user_id && e.user_id[0]) 
+                .filter(e => e._role === "manager")
                 .map(e => ({
-                    id: e.user_id[0], 
-                    name: e.user_id[1], 
-                    pin: e.pin || "", 
-                    employee_name: e.name, 
+                    id: e.id,
+                    name: e.name,
+                    _pin: e._pin,
+                    employee_name: e.name,
                 }));
         }
         
