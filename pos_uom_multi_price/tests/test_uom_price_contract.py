@@ -86,3 +86,20 @@ class TestUomPriceContract(TransactionCase):
             "product_multi_uom_price_constraint_product_multi_uom_price_uniq",
             constraints,
         )
+
+    def test_stock_move_uses_the_selected_uom_record(self):
+        dozen = self.env.ref("uom.product_uom_dozen")
+        product = self.env["product.product"].new({
+            "name": "POS stock UOM regression",
+            "uom_id": self.env.ref("uom.product_uom_unit").id,
+        })
+        line = self.env["pos.order.line"].new({
+            "product_id": product.id,
+            "uom_id": dozen.id,
+            "qty": 1,
+        })
+        picking = self.env["stock.picking"].new({})
+
+        move_values = picking._prepare_stock_move_vals(line, line)
+
+        self.assertEqual(move_values["uom_id"], dozen.id)

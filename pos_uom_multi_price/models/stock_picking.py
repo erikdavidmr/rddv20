@@ -7,7 +7,7 @@ class StockPicking(models.Model):
 
     def _prepare_stock_move_vals(self, first_line, order_lines):
         res = super(StockPicking, self)._prepare_stock_move_vals(first_line, order_lines)
-        res['product_uom'] = first_line.uom_id.id or first_line.product_id.uom_id.id,
+        res['uom_id'] = first_line.uom_id.id or first_line.product_id.uom_id.id
         return res
     
     def _create_move_from_pos_order_lines(self, lines):
