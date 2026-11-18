@@ -103,3 +103,40 @@ class TestUomPriceContract(TransactionCase):
         move_values = picking._prepare_stock_move_vals(line, line)
 
         self.assertEqual(move_values["uom_id"], dozen.id)
+
+    def test_stock_move_in_selected_uom_converts_on_hand_quantity(self):
+        unit = self.env.ref("uom.product_uom_unit")
+        dozen = self.env.ref("uom.product_uom_dozen")
+        product = self.env["product.product"].create({
+            "name": "POS stock conversion regression",
+            "is_storable": True,
+            "uom_id": unit.id,
+        })
+        stock_location = self.env.ref("stock.stock_location_stock")
+        customer_location = self.env.ref("stock.stock_location_customers")
+        self.env["stock.quant"]._update_available_quantity(product, stock_location, 24)
+        picking_type = self.env.ref("stock.picking_type_out")
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": picking_type.id,
+            "location_id": stock_location.id,
+            "location_dest_id": customer_location.id,
+            "company_id": self.env.company.id,
+        })
+        line = self.env["pos.order.line"].new({
+            "product_id": product.id,
+            "uom_id": dozen.id,
+            "qty": 1,
+        })
+
+        move = self.env["stock.move"].create(
+            picking._prepare_stock_move_vals(line, line)
+        )
+        move._action_confirm()
+        move.quantity = 1
+        move.picked = True
+        move._action_done()
+
+        self.assertAlmostEqual(
+            self.env["stock.quant"]._get_available_quantity(product, stock_location),
+            12,
+        )
