@@ -123,3 +123,22 @@ class TestManagerApprovalContract(TransactionCase):
     def test_session_close_restriction_flag_is_loaded_into_pos_config(self):
         fields = self.env["pos.config"]._load_pos_data_fields(self.env["pos.config"])
         self.assertIn("enable_restriction_on_session_close", fields)
+
+    def test_rdd_close_popup_template_uses_owl_3_component_context(self):
+        addon_root = Path(__file__).parents[2]
+        template = (
+            addon_root / "rdd_module/static/src/app/navbar/closing_popup/closing_popup.xml"
+        ).read_text()
+        for legacy_expression in (
+            't-if="pos.config.',
+            't-if="props.',
+            't-esc="props.',
+            't-model="state.',
+            't-on-click="confirm"',
+            't-on-click="cancel"',
+            't-on-click="openDetailsPopup"',
+        ):
+            self.assertNotIn(legacy_expression, template)
+        self.assertIn('t-if="this.pos.config.cash_control"', template)
+        self.assertIn('t-if="this.props.opening_notes"', template)
+        self.assertIn('t-model.proxy="this.state.notes"', template)
