@@ -6,9 +6,19 @@ import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
+import { PosAccessRightPlugin } from "@point_of_sale/app/plugins/access_right_plugin";
 import { Component, proxy, useProps, t, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { ask } from "@point_of_sale/app/utils/make_awaitable_dialog";
+
+patch(PosAccessRightPlugin.prototype, {
+    get canCloseSession() {
+        if (this.config.module_pos_hr && this.config.enable_restriction_on_session_close) {
+            return this.hasEmployeeRole(["cashier", "manager"]);
+        }
+        return super.canCloseSession;
+    },
+});
 
 export class ManagerSelectPopup extends Component {
     static template = xml`

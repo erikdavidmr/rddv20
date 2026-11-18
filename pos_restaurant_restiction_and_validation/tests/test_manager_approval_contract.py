@@ -108,3 +108,14 @@ class TestManagerApprovalContract(TransactionCase):
         self.assertIn("props = useProps({", source)
         self.assertIn('this.props.managers', source)
         self.assertIn('t-model.proxy="this.state.pin"', source)
+
+    def test_cashiers_can_reach_manager_gated_session_close(self):
+        addon = Path(__file__).parents[1]
+        source = (addon / "static/src/app/session_close_by_manager.js").read_text()
+        self.assertIn(
+            'import { PosAccessRightPlugin } from "@point_of_sale/app/plugins/access_right_plugin";',
+            source,
+        )
+        self.assertIn("get canCloseSession()", source)
+        self.assertIn("this.config.enable_restriction_on_session_close", source)
+        self.assertIn('this.hasEmployeeRole(["cashier", "manager"])', source)
