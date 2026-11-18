@@ -18,6 +18,20 @@ class TestManagerApprovalContract(TransactionCase):
         }
         self.assertTrue(setting_fields <= set(self.env["res.config.settings"]._fields))
 
+    def test_manager_approval_access_is_granted_to_pos_users(self):
+        pos_user_group = self.env.ref("point_of_sale.group_pos_user")
+        access_ids = (
+            "access_pos_manager_approval_m",
+            "access_pos_manager_approval_u",
+        )
+        for access_id in access_ids:
+            access = self.env.ref(
+                f"pos_restaurant_restiction_and_validation.{access_id}"
+            )
+            self.assertEqual(access.model_id.model, "manager.approval")
+            self.assertEqual(access.group_id, pos_user_group)
+            self.assertEqual(access.operation, "crud")
+
     def test_pos_scripts_import_the_odoo_20_component_modules(self):
         addon = Path(__file__).parents[1]
         expected = {
