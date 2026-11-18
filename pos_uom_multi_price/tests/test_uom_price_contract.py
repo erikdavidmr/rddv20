@@ -6,6 +6,8 @@ class TestUomPriceContract(TransactionCase):
     def test_uom_selector_import_uses_the_odoo_20_dialog_module(self):
         from pathlib import Path
         source = (Path(__file__).parents[1] / "static/src/app/product_screen/order_summary/order_summary.js").read_text()
+        self.assertIn("this.pos.getOrder()", source)
+        self.assertNotIn("this.pos.get_order()", source)
         self.assertIn("@point_of_sale/app/utils/make_awaitable_dialog", source)
         self.assertIn("@point_of_sale/app/components/popups/selection_popup/selection_popup", source)
         self.assertNotIn("@point_of_sale/app/store/make_awaitable_dialog", source)
@@ -23,6 +25,20 @@ class TestUomPriceContract(TransactionCase):
         self.assertNotIn("pos.config.ka_multi_uom", parent_template.replace("this.pos.config.ka_multi_uom", ""))
         self.assertIn("//span[hasclass('text-wrap')]", orderline_template)
         self.assertIn('t-call-slot="uom-multi-price"', orderline_template)
+
+    def test_uom_price_calculation_uses_odoo_20_orderline_api(self):
+        from pathlib import Path
+        source = (Path(__file__).parents[1] / "static/src/overrides/models/pos_order_line.js").read_text()
+        active_source = source.split("///** @odoo-module */")[0]
+        self.assertIn("this.product_id.getPrice(", active_source)
+        self.assertIn("this.getPriceExtra()", active_source)
+        self.assertNotIn("this.product_id.get_price(", active_source)
+        self.assertIn("setQuantity(quantity, keep_price)", active_source)
+        self.assertIn("setUnitPrice(price)", active_source)
+        self.assertIn("setPricelist(pricelist)", active_source)
+        self.assertNotIn("get_quantity()", active_source)
+        self.assertNotIn("set_unit_price(", active_source)
+        self.assertNotIn("get_all_prices(", active_source)
 
     def test_pos_loader_accepts_the_odoo_20_config_record(self):
         config = self.env["pos.config"].search([], limit=1)
