@@ -25,6 +25,8 @@ class ManagerApproval(models.Model):
     cashier = fields.Many2one('hr.employee', string='Cashier', readonly=True)
     state = fields.Selection(STATES, string="Action")
     order_number = fields.Char(string='Order Number')
+    is_otp = fields.Boolean(string="Autorizado por OTP", default=False, readonly=True)
+    otp_code = fields.Char(string="Código OTP", readonly=True)
 
     @api.model
     def getting_all_data(self,kwargs):
@@ -34,11 +36,13 @@ class ManagerApproval(models.Model):
             new = 'order_deleted'
         else:
             new = 'orderline_deleted'
-        self.env['manager.approval'].create({
+        return self.env['manager.approval'].create({
             'session_id': kwargs.get('session_id'),
             'cashier': kwargs.get('cashier1'),
             'manager_approved': kwargs.get('manager'),
             'state': new,
             'receipt_number': kwargs.get('receipt'),
-            'order_number': kwargs.get('order_num')
+            'order_number': kwargs.get('order_num'),
+            'is_otp': kwargs.get('is_otp', False),
+            'otp_code': kwargs.get('otp_code', False),
         })

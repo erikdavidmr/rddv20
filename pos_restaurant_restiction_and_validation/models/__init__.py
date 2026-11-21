@@ -8,3 +8,4 @@
 #################################################################################
 from . import model
 from . import pos_manager_approval
+from . import pos_approval_otp

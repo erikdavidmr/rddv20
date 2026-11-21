@@ -27,16 +27,23 @@ export class ManagerSelectPopup extends Component {
                 <t t-esc="this.props.title"/>
             </div>
             <div class="body">
+                <label class="form-label text-muted small">Gerente Responsable:</label>
                 <select t-model.proxy="this.state.selectedManagerId" class="form-select mb-3">
                     <t t-foreach="this.props.managers" t-as="manager" t-key="manager.id">
                         <option t-att-value="manager.id" t-esc="manager.name"/>
                     </t>
                 </select>
-                <input type="password" t-model.proxy="this.state.pin" class="form-control mb-3" placeholder="Enter PIN" t-on-keyup="this._onPinKeyup"/>
+                <label class="form-label text-muted small">PIN del Gerente o Código Temporal OTP:</label>
+                <input type="password" t-model.proxy="this.state.pin" class="form-control mb-3" placeholder="Ingrese PIN o Código OTP" t-on-keyup="this._onPinKeyup"/>
             </div>
-            <div class="footer">
-                <button t-on-click="this.confirm" class="btn btn-primary">Confirm</button>
-                <button t-on-click="this.cancel" class="btn btn-secondary">Cancel</button>
+            <div class="footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex gap-2">
+                    <button t-on-click="this.confirm" class="btn btn-primary">Confirmar</button>
+                    <button t-on-click="this.requestRemoteOtp" class="btn btn-info text-white">
+                        <i class="fa fa-paper-plane me-1"/> Solicitar Código Remoto
+                    </button>
+                </div>
+                <button t-on-click="this.cancel" class="btn btn-secondary">Cancelar</button>
             </div>
         </div>`;
 
@@ -52,7 +59,6 @@ export class ManagerSelectPopup extends Component {
             selectedManagerId: this.props.managers[0]?.id || null,
             pin: "",
         });
-        console.log("[ManagerSelectPopup] Estado inicial:", this.state);
     }
 
     _onPinKeyup(ev) {
@@ -61,46 +67,84 @@ export class ManagerSelectPopup extends Component {
         }
     }
 
-    async confirm() {
-        console.log("[ManagerSelectPopup] Confirm llamado, estado actual:", this.state);
-        
-        const selectedManager = this.props.managers.find(u => u.id === parseInt(this.state.selectedManagerId, 10));
-        console.log("[ManagerSelectPopup] Manager seleccionado:", selectedManager);
+    async requestRemoteOtp() {
+        try {
+            const pos = this.env.services.pos;
+            const otpRes = await this.env.services.orm.call("pos.approval.otp", "action_request_otp", [{
+                config_id: pos.config.id,
+                session_id: pos.config.current_session_id?.id,
+                cashier_id: pos.accessRight.cashier?.id,
+                action_type: 'session_close',
+                details: _t("Cierre de Sesión / Corte de Caja"),
+                receipt_number: '',
+                order_number: '',
+            }]);
 
-        if (!selectedManager) {
-            console.error("[ManagerSelectPopup] Error: Manager no encontrado");
-            await this.showError("Selection Error", "Manager not found");
-            this.props.onConfirm({ confirmed: false, error: "Manager not found" });
-            return;
-        }
-        
-        if (!this.state.pin) {
-            console.error("[ManagerSelectPopup] Error: PIN no ingresado");
-            await this.showError("PIN Required", "Please enter PIN");
-            return;
-        }
-        
-        console.log("[ManagerSelectPopup] Validando PIN...");
-        if (selectedManager._pin && selectedManager._pin === Sha1.hash(this.state.pin)) {
-            console.log("[ManagerSelectPopup] PIN correcto, procediendo");
-            this.props.onConfirm({ 
-                confirmed: true,
-                manager: selectedManager,
-                enteredPin: this.state.pin
-            });
-        } else {
-            console.warn("[ManagerSelectPopup] PIN incorrecto");
-            await this.showError("Incorrect PIN", "The PIN entered is not valid.");
+            if (otpRes && otpRes.success) {
+                await this.env.services.dialog.add(AlertDialog, {
+                    title: _t("Código Temporal Enviado"),
+                    body: _t("Se ha enviado un código de autorización al correo: %s.\nVigencia: %s minutos. Solicite el código al gerente e ingréselo en el campo de PIN.", otpRes.email, otpRes.validity_minutes),
+                });
+            } else {
+                await this.showError("Error al Solicitar Código", otpRes?.message || _t("No fue posible generar el código temporal."));
+            }
+        } catch (err) {
+            await this.showError("Error de Conexión", err.message || err);
         }
     }
 
+    async confirm() {
+        const selectedManager = this.props.managers.find(u => u.id === parseInt(this.state.selectedManagerId, 10));
+
+        if (!this.state.pin) {
+            await this.showError("PIN Requerido", "Por favor ingrese el PIN o Código Temporal.");
+            return;
+        }
+
+        // 1. Validar PIN físico si coincide con el manager seleccionado
+        if (selectedManager && selectedManager._pin && selectedManager._pin === Sha1.hash(this.state.pin)) {
+            this.props.onConfirm({ 
+                confirmed: true,
+                manager: selectedManager,
+                enteredPin: this.state.pin,
+                is_otp: false
+            });
+            return;
+        }
+
+        // 2. Si no es el PIN físico, validar si es un código OTP temporal en backend
+        try {
+            const pos = this.env.services.pos;
+            const validation = await this.env.services.orm.call("pos.approval.otp", "validate_approval", [
+                pos.config.id,
+                pos.config.current_session_id?.id,
+                this.state.pin,
+                'session_close',
+                _t("Cierre de Sesión POS"),
+                pos.accessRight.cashier?.id,
+            ]);
+
+            if (validation && validation.approved) {
+                this.props.onConfirm({
+                    confirmed: true,
+                    manager: selectedManager || { id: validation.manager_id, name: validation.manager_name },
+                    enteredPin: this.state.pin,
+                    is_otp: true
+                });
+                return;
+            }
+        } catch (err) {
+            console.error("[ManagerSelectPopup] Error validando OTP:", err);
+        }
+
+        await this.showError("PIN o Código Incorrecto", "El PIN o Código Temporal ingresado no es válido o ya expiró.");
+    }
+
     cancel() {
-        console.log("[ManagerSelectPopup] Cancel llamado");
         this.props.onConfirm({ confirmed: false });
     }
 
     async showError(title, body) {
-        console.log(`[ManagerSelectPopup] Mostrando error: ${title} - ${body}`);
         await this.env.services.dialog.add(AlertDialog, {
             title: _t(title),
             body: _t(body),
@@ -467,6 +511,10 @@ patch(ClosePosPopup.prototype, {
                 });
                 return false;
             }
+            if (managerValidationResult.is_otp) {
+                console.log("[ClosePosPopup] Aprobación ya registrada por validación OTP en backend");
+                return true;
+            }
             try {
                 await this.env.services.orm.call(
                     "manager.approval",
@@ -475,7 +523,8 @@ patch(ClosePosPopup.prototype, {
                         session_id: this.pos.config.current_session_id.id, 
                         manager: managerValidationResult.manager.id, 
                         cashier1: cashier.id,
-                        state: 'session_close'
+                        state: 'session_close',
+                        is_otp: false
                     }]
                 );
                 console.log("[ClosePosPopup] Aprobación registrada exitosamente");

@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
-<!-- See LICENSE file for full copyright and licensing details. -->
-<!-- License URL : <https://store.webkul.com/license.html/> -->
 <template id="popup" xml:space="preserve">
     <t t-name="pos_restaurant_restiction_and_validation.DenyPopup">
         <Dialog size="'md'" title="this.props.title">
             <div class="popup popup-textarea">
-    
-                <div class="modal-body">
+                <div class="modal-body fs-5 text-dark p-3">
                     <t t-esc="this.props.body" />
                 </div>
                 <t t-set-slot="footer">
-                    <div class="d-flex w-100 justify-content-start gap-2">
-                        <button class="button btn btn-primary o-default-button" t-on-click="this.confirm"><t t-esc="this.props.confirmText" /></button>
-                        <button class="button btn btn-secondary o-default-button" t-on-click="this.cancel"><t t-esc="this.props.cancelText" /></button>
+                    <div class="d-flex w-100 justify-content-between align-items-center gap-2 flex-wrap p-2">
+                        <div class="d-flex gap-2">
+                            <button class="button btn btn-primary o-default-button" t-on-click="this.confirm">
+                                <i class="fa fa-key me-1"/> <t t-esc="this.props.confirmText" />
+                            </button>
+                            <button t-if="this.props.showRequestOtp" class="button btn btn-info text-white" t-on-click="this.requestOtp">
+                                <i class="fa fa-paper-plane me-1"/> <t t-esc="this.props.requestOtpText" />
+                            </button>
+                        </div>
+                        <button class="button btn btn-secondary o-default-button" t-on-click="this.cancel">
+                            <t t-esc="this.props.cancelText" />
+                        </button>
                     </div>
                 </t>
             </div>
         </Dialog>
     </t>
-
-    
 </template>

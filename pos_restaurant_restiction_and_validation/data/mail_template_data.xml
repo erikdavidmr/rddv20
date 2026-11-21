@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="mail_template_pos_approval_otp" model="mail.template">
+            <field name="name">POS: Código Temporal de Autorización (OTP)</field>
+            <field name="model_id" ref="model_pos_approval_otp"/>
+            <field name="subject">[AUTORIZACIÓN REQUERIDA] Código POS: {{ object.code }} - {{ object.pos_config_id.name }}</field>
+            <field name="email_to">{{ object.recipient_email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 15px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7f9fa; color: #212529;">
+    <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        
+        <!-- Header -->
+        <div style="background-color: #875A7B; padding: 20px; text-align: center; color: #ffffff;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 600;">SOLICITUD DE AUTORIZACIÓN POS</h2>
+            <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">
+                <t t-out="object.pos_config_id.company_id.name or ''"/> - <t t-out="object.pos_config_id.name or ''"/>
+            </p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 24px;">
+            <p style="font-size: 15px; margin-top: 0;">
+                Se ha generado una solicitud de autorización en Punto de Venta que requiere aprobación remota de gerencia:
+            </p>
+
+            <!-- OTP Box -->
+            <div style="background-color: #f1f5f9; border: 2px dashed #94a3b8; border-radius: 8px; padding: 18px; text-align: center; margin: 20px 0;">
+                <span style="display: block; font-size: 13px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">
+                    CÓDIGO DE UN SOLO USO (OTP)
+                </span>
+                <span style="display: block; font-size: 38px; font-weight: bold; color: #1e293b; letter-spacing: 6px; margin: 10px 0;">
+                    <t t-out="object.code"/>
+                </span>
+                <span style="display: inline-block; background-color: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                    ⚠️ Válido durante <t t-out="object.pos_config_id.otp_validity_minutes or 10"/> minutos • Un solo uso
+                </span>
+            </div>
+
+            <!-- Detalle de la Solicitud -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 8px 0; color: #64748b; width: 35%;"><strong>Acción:</strong></td>
+                    <td style="padding: 8px 0; font-weight: 600; color: #0f172a;">
+                        <t t-if="object.action_type == 'orderline_deleted'">Eliminación / Reducción de Línea</t>
+                        <t t-elif="object.action_type == 'order_deleted'">Eliminación de Ticket Completo</t>
+                        <t t-elif="object.action_type == 'session_close'">Cierre de Sesión de Caja</t>
+                        <t t-else=""><t t-out="object.action_type"/></t>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 8px 0; color: #64748b;"><strong>Cajero:</strong></td>
+                    <td style="padding: 8px 0; color: #0f172a;"><t t-out="object.cashier_id.name or 'Cajero'"/></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 8px 0; color: #64748b;"><strong>Ticket / Recibo:</strong></td>
+                    <td style="padding: 8px 0; color: #0f172a;"><t t-out="object.order_number or object.receipt_number or 'En curso'"/></td>
+                </tr>
+                <t t-if="object.details">
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 8px 0; color: #64748b;"><strong>Detalle:</strong></td>
+                    <td style="padding: 8px 0; color: #b91c1c; font-weight: 600;"><t t-out="object.details"/></td>
+                </tr>
+                </t>
+            </table>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;">
+                <em>Dicta este código al cajero únicamente si verificaste y autorizas la operación. En cuanto sea ingresado en el sistema, el código quedará quemado e inservible.</em>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8fafc; padding: 12px 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0;">
+            Sistema de Seguridad y Auditoría POS • <t t-out="object.pos_config_id.company_id.name or ''"/>
+        </div>
+    </div>
+</div>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
-<!-- See LICENSE file for full copyright and licensing details. -->
-<!-- License URL : <https://store.webkul.com/license.html/> -->
 <odoo>
     <data>
         <record id="view_pos_config_form_inherit" model="ir.ui.view">
@@ -11,22 +8,57 @@
             <field name="arch" type="xml">
                 <xpath expr="//block[@id='restaurant_section']" position="inside">
                     <setting id="enable_pos_restaurant_restiction"
-                        help="Enable restriction on some operations once the order has been sent to the kitchen">
+                        help="Restringe borrado de líneas, cancelación de tickets y cierre de caja sin PIN o código temporal de gerente.">
                         <field name="is_pos_restaurant_restiction" />
 
                         <div invisible="not is_pos_restaurant_restiction">
                             <field name="is_restriction_on_orderline_delete" class="oe_inline"/>
-                            <label class="fw-normal" for="is_restriction_on_orderline_delete" string="Orderline Delete"/>
+                            <label class="fw-normal" for="is_restriction_on_orderline_delete" string="Restricción en Borrado de Líneas"/>
                         </div>
 
                         <div invisible="not is_pos_restaurant_restiction">
                             <field name="is_restriction_on_order_delete" class="oe_inline"/>
-                            <label class="fw-normal" for="is_restriction_on_order_delete" string="Order Delete"/>
+                            <label class="fw-normal" for="is_restriction_on_order_delete" string="Restricción en Borrado de Orden/Ticket"/>
                         </div>
 
                         <div invisible="not is_pos_restaurant_restiction">
                             <field name="is_restriction_on_session_close" class="oe_inline"/>
-                            <label class="fw-normal" for="is_restriction_on_session_close" string="Session Close"/>
+                            <label class="fw-normal" for="is_restriction_on_session_close" string="Restricción en Cierre de Sesión"/>
+                        </div>
+                    </setting>
+
+                    <setting id="pos_otp_authorization_section" title="Autorización Remota por Código Temporal (OTP)"
+                        help="Permite a los gerentes que no están presentes en la sucursal autorizar operaciones enviando un código temporal de un solo uso por Correo o WhatsApp."
+                        invisible="not is_pos_restaurant_restiction">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="pos_otp_delivery_method" class="col-lg-4 o_light_label" string="Canal de Notificación"/>
+                                <field name="pos_otp_delivery_method" class="col-lg-8"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="pos_manager_approval_email" class="col-lg-4 o_light_label" string="Correo del Gerente"/>
+                                <field name="pos_manager_approval_email" placeholder="gerente@empresa.com" class="col-lg-8"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="pos_manager_approval_employee_id" class="col-lg-4 o_light_label" string="Gerente Asignado"/>
+                                <field name="pos_manager_approval_employee_id" class="col-lg-8"/>
+                            </div>
+                            <div class="row mt8" invisible="pos_otp_delivery_method == 'email'">
+                                <label for="pos_manager_approval_phone" class="col-lg-4 o_light_label" string="WhatsApp Gerente"/>
+                                <field name="pos_manager_approval_phone" placeholder="+52 477 123 4567" class="col-lg-8"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="pos_otp_validity_minutes" class="col-lg-4 o_light_label" string="Vigencia OTP (Minutos)"/>
+                                <field name="pos_otp_validity_minutes" class="col-lg-4"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="pos_otp_mail_template_id" class="col-lg-4 o_light_label" string="Plantilla de Correo"/>
+                                <field name="pos_otp_mail_template_id" class="col-lg-8" options="{'no_create': True}"/>
+                            </div>
+                            <div class="row mt8" invisible="pos_otp_delivery_method == 'email'">
+                                <label for="pos_otp_whatsapp_template_id" class="col-lg-4 o_light_label" string="Plantilla de WhatsApp"/>
+                                <field name="pos_otp_whatsapp_template_id" class="col-lg-8" options="{'no_create': True}"/>
+                            </div>
                         </div>
                     </setting>
                 </xpath>

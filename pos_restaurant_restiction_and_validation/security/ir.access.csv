@@ -1,3 +1,5 @@
 id,name,model_id,group_id/id,operation,domain
 access_pos_manager_approval_m,approval.manager,manager.approval,point_of_sale.group_pos_user,crud,
 access_pos_manager_approval_u,approval.user,manager.approval,point_of_sale.group_pos_user,crud,
+access_pos_approval_otp_user,pos.approval.otp.user,pos.approval.otp,point_of_sale.group_pos_user,crud,
+access_pos_approval_otp_mgr,pos.approval.otp.mgr,pos.approval.otp,point_of_sale.group_pos_manager,crud,
