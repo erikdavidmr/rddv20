@@ -20,7 +20,6 @@ class ProductProduct(models.Model):
         
         query = (query or '').strip()
         if query:
-            # Si parece código de barras o código exacto
             domain += [
                 '|', '|',
                 ('barcode', 'ilike', query),
@@ -91,9 +90,14 @@ class ProductProduct(models.Model):
                 })
 
         # Búsqueda de presentaciones hermanas (mismo producto en Granel, Paquete, Caja, Pieza, etc.)
+        stop_words = {
+            'granel', 'gnl', 'paq', 'paquete', 'caja', 'cja', 'pza', 'pieza',
+            'pzs', 'piezas', 'kg', 'kilo', 'gr', 'gramos', 'piloto', 'empaque',
+            'chico', 'grande', 'display', 'bolsa', 'tira', 'bote', 'tubo'
+        }
         clean_name = re.sub(
-            r'(?i)\b(granel|gnl|paq|paquete|caja|cja|pza|pieza|pzs|piezas|kg|kilo|gr|gramos|c/\d+|piloto)\b',
-            '',
+            r'(?i)\b(\w+)\b',
+            lambda m: '' if m.group(1).lower() in stop_words or m.group(1).isdigit() or m.group(1).lower().startswith('c/') else m.group(1),
             p.name or ''
         )
         clean_name = ' '.join(clean_name.split())
@@ -105,7 +109,7 @@ class ProductProduct(models.Model):
                 ('available_in_pos', '=', True),
                 ('sale_ok', '=', True),
             ]
-            for w in words[:3]:
+            for w in words[:2]:
                 s_domain.append(('name', 'ilike', w))
             sibling_prods = self.search(s_domain, limit=6)
             for s in sibling_prods:
