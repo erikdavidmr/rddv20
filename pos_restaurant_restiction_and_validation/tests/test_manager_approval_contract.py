@@ -41,6 +41,7 @@ class TestManagerApprovalContract(TransactionCase):
         expected = {
             "static/src/app/decrease_quantity_by_manager.js": (
                 "@point_of_sale/app/components/popups/number_popup/number_popup",
+                "@point_of_sale/app/utils/make_awaitable_dialog",
             ),
             "static/src/app/delete_by_manager.js": (
                 "@point_of_sale/app/components/popups/number_popup/number_popup",
@@ -82,8 +83,8 @@ class TestManagerApprovalContract(TransactionCase):
             self.assertIn('employee._role === "manager"', source, relative_path)
             pin_check = "Sha1.hash(this.state.pin)" if relative_path == active_scripts[2] else "Sha1.hash(enteredPin)"
             self.assertIn(pin_check, source, relative_path)
-        self.assertIn("cashier?._role !== 'cashier'", (addon / active_scripts[0]).read_text())
-        self.assertIn("cashier._role === 'cashier'", (addon / active_scripts[1]).read_text())
+        self.assertIn("cashier?._role === 'manager'", (addon / active_scripts[0]).read_text())
+        self.assertIn("cashier?._role !== 'manager'", (addon / active_scripts[1]).read_text())
         source = (addon / active_scripts[2]).read_text()
         self.assertNotIn('"pin"', source)
 
