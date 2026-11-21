@@ -6,13 +6,15 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <!-- Botón de acción en la cabecera -->
-            <xpath expr="//header" position="inside">
-                <button name="action_open_pricelist_assign_wizard"
-                        string="Asignar a Listas de Precios"
-                        type="object"
-                        class="btn-primary"
-                        icon="fa-tags"/>
+            <!-- Header con botón principal antes de sheet -->
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_open_pricelist_assign_wizard"
+                            string="Asignar a Listas de Precios"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-tags"/>
+                </header>
             </xpath>
 
             <!-- Smart button en la caja de botones -->
@@ -23,6 +25,15 @@
                         icon="fa-list-ol">
                     <field string="En Listas" name="pricelist_rule_count" widget="statinfo"/>
                 </button>
+            </xpath>
+
+            <!-- Botón de acceso directo junto al precio de venta -->
+            <xpath expr="//div[@name='list_price_per_uom_id']" position="after">
+                <button name="action_open_pricelist_assign_wizard"
+                        type="object"
+                        string="Asignar en Listas"
+                        icon="fa-pencil"
+                        class="btn-link oe_inline p-0 ms-2"/>
             </xpath>
         </field>
     </record>
