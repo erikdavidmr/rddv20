@@ -55,3 +55,16 @@ class PosSession(models.Model):
                 )
                 pm.invalidate_recordset(['outstanding_account_id'])
         return super()._create_session_account_move(orders)
+
+
+class AccountMove(models.Model):
+    _inherit = 'account.move'
+
+    def _l10n_mx_edi_is_cfdi_invoice(self):
+        self.ensure_one()
+        # Las facturas de cierre de sesión de PDV (POSC/...) son pólizas de cierre contable,
+        # no deben timbrarse directamente como CFDI individual para evitar duplicidad fiscal.
+        # El CFDI Global se emite desde las órdenes de venta del PDV.
+        if self.pos_session_ids:
+            return False
+        return super()._l10n_mx_edi_is_cfdi_invoice()
