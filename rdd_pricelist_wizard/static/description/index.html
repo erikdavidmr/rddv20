@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <title>RDD - Asistente de Asignación de Precios</title>
+    <style>
+        .rdd-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            background: #ffffff;
+        }
+        .rdd-header {
+            background: linear-gradient(135deg, #714B67 0%, #4a2840 100%);
+            color: #ffffff;
+            padding: 32px 24px;
+            border-radius: 8px 8px 0 0;
+        }
+        .rdd-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            margin-right: 6px;
+        }
+        .badge-purple { background-color: #ede9fe; color: #6d28d9; }
+        .badge-green { background-color: #dcfce7; color: #15803d; }
+        .badge-blue { background-color: #e0f2fe; color: #0369a1; }
+        .rdd-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+        .rdd-step-num {
+            background-color: #714B67;
+            color: #ffffff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+        .rdd-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        .rdd-table th {
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 10px 14px;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+        .rdd-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            font-size: 0.88rem;
+        }
+        .rdd-callout {
+            border-left: 4px solid #714B67;
+            background-color: #fdf4f9;
+            padding: 14px 18px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #334155; line-height: 1.6; padding: 20px;">
+
+    <!-- ENCABEZADO -->
+    <div class="rdd-card">
+        <div class="rdd-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <h1 style="margin: 0 0 8px 0; font-size: 1.8rem; font-weight: 700;">RDD - Asistente de Asignación de Precios</h1>
+                    <p style="margin: 0; font-size: 1.05rem; opacity: 0.9;">
+                        Gestión centralizada y simplificada de precios regulares, mayoreo y promociones para Odoo 20.
+                    </p>
+                </div>
+                <div style="margin-top: 10px;">
+                    <span class="rdd-badge badge-green">Versión 20.0</span>
+                    <span class="rdd-badge badge-blue">Multi-Empresa</span>
+                    <span class="rdd-badge badge-purple">Punto de Venta</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESCRIPCIÓN Y OBJETIVO -->
+        <div style="padding: 24px;">
+            <h2 style="color: #714B67; font-size: 1.3rem; margin-top: 0;">1. Descripción y Objetivo</h2>
+            <p>
+                En cadenas de retail y confitería con múltiples sucursales y listas de precios (menudeo, mayoreo, clientes especiales y promociones por día), asignar precios producto por producto en cada lista es un proceso lento, propenso a errores de captura, olvido de listas y precios de $0.00 en cajas.
+            </p>
+            <p>
+                <strong>RDD - Asistente de Asignación de Precios</strong> proporciona una interfaz unificada que permite a compras y administración fijar todos los niveles de precio de un producto (menudeo, mayoreo y días de oferta) <strong>en una sola pantalla y con 1 solo clic</strong>, propagándolos automáticamente a las listas base y derivadas de todas las sucursales.
+            </p>
+
+            <div class="rdd-callout">
+                <strong>Problema resuelto:</strong> Elimina la incertidumbre de no saber si un producto ya está en las listas de las tiendas. El asistente muestra una auditoría en vivo de los precios actuales y nunca duplica reglas existentes.
+            </div>
+        </div>
+    </div>
+
+    <!-- ALCANCE Y ARQUITECTURA -->
+    <div class="rdd-card" style="padding: 24px;">
+        <h2 style="color: #714B67; font-size: 1.3rem; margin-top: 0;">2. Alcance y Arquitectura Técnica</h2>
+        <p>El módulo combina dos principios arquitectónicos de alto rendimiento:</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 14px;">
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background-color: #f8fafc;">
+                <h3 style="margin-top: 0; color: #1e293b; font-size: 1.05rem;">A. Arquitectura de Lista Base Común</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 0;">
+                    Las sucursales (San Juan, Islas, Pie de la Cuesta, etc.) y los turnos derivan por herencia de listas base compartidas (ej. <em>PILOTO - BASE COMUN</em>). Al asignar el precio en la lista base mediante el asistente, <strong>todas las sucursales quedan cubiertas al instante</strong>.
+                </p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background-color: #f8fafc;">
+                <h3 style="margin-top: 0; color: #1e293b; font-size: 1.05rem;">B. Asistente Rápido (TransientModel)</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 0;">
+                    Un wizard intuitivo (<code>rdd.pricelist.assign.wizard</code>) accesible directamente desde la ficha del producto y desde el Punto de Venta. Calcula márgenes en tiempo real respecto al costo PUC y previene duplicados actualizando las reglas si ya existen.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GUÍA DE USO Y MANUAL PASO A PASO -->
+    <div class="rdd-card" style="padding: 24px;">
+        <h2 style="color: #714B67; font-size: 1.3rem; margin-top: 0;">3. Guía de Uso Paso a Paso (Manual)</h2>
+
+        <div class="rdd-step">
+            <div class="rdd-step-num">1</div>
+            <div>
+                <strong style="color: #1e293b;">Abrir el Asistente desde la Ficha del Producto</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                    Ingresa a <strong>Punto de Venta</strong> o <strong>Inventario</strong> &rarr; <strong>Productos</strong> y abre el producto deseado. Haz clic en el botón principal <strong>"Asignar a Listas de Precios"</strong> en la cabecera o en el botón estadístico <strong>"En Listas"</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div class="rdd-step">
+            <div class="rdd-step-num">2</div>
+            <div>
+                <strong style="color: #1e293b;">Verificar el Estado Actual del Producto</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                    En la pestaña <em>"Precios Actuales del Producto"</em> se despliega una tabla con todas las listas donde ya está registrado el artículo. Si el producto es nuevo o no tiene precios, verás una advertencia amarilla indicando que está pendiente.
+                </p>
+            </div>
+        </div>
+
+        <div class="rdd-step">
+            <div class="rdd-step-num">3</div>
+            <div>
+                <strong style="color: #1e293b;">Capturar el Precio Menudeo / Regular</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                    Ingresa el precio de venta normal por pieza, paquete o kilogramo. El asistente muestra el <strong>Costo PUC</strong> y calcula el <strong>Margen Regular (%)</strong> al instante.
+                </p>
+            </div>
+        </div>
+
+        <div class="rdd-step">
+            <div class="rdd-step-num">4</div>
+            <div>
+                <strong style="color: #1e293b;">Configurar Mayoreo (Opcional)</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                    Marca la casilla <em>"¿Asignar Precio Mayoreo?"</em>, introduce el precio especial por volumen y la cantidad mínima requerida (ej. 3 unidades o 5 kg).
+                </p>
+            </div>
+        </div>
+
+        <div class="rdd-step">
+            <div class="rdd-step-num">5</div>
+            <div>
+                <strong style="color: #1e293b;">Configurar Promoción / Días Especiales (Opcional)</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                    Si el producto entra en oferta (ej. Miércoles de descuento), marca <em>"¿Asignar Precio Promoción?"</em> y fija el precio de oferta. El módulo <code>rdd_module</code> lo activará en las cajas el día correspondiente mediante su cron nocturno.
+                </p>
+            </div>
+        </div>
+
+        <div class="rdd-step">
+            <div class="rdd-step-num">6</div>
+            <div>
+                <strong style="color: #1e293b;">Guardar y Aplicar</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                    Presiona el botón verde <strong>"Guardar y Asignar Precios"</strong>. Las reglas se crean/actualizan de forma limpia y recibirás una notificación de confirmación en pantalla.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- EJEMPLOS PRÁCTICOS -->
+    <div class="rdd-card" style="padding: 24px;">
+        <h2 style="color: #714B67; font-size: 1.3rem; margin-top: 0;">4. Ejemplos Prácticos</h2>
+
+        <h3 style="font-size: 1.05rem; color: #1e293b; margin-top: 14px;">Ejemplo A: Producto Empaque Cerrado (Bocadín 50 piezas)</h3>
+        <table class="rdd-table">
+            <thead>
+                <tr>
+                    <th>Nivel de Precio</th>
+                    <th>Condición / Cantidad</th>
+                    <th>Precio Capturado</th>
+                    <th>Efecto en Sucursales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Menudeo Regular</strong></td>
+                    <td>1 Paquete</td>
+                    <td>$155.00</td>
+                    <td>Aplica en todas las tiendas los días normales.</td>
+                </tr>
+                <tr>
+                    <td><strong>Mayoreo</strong></td>
+                    <td>A partir de 5 Paquetes</td>
+                    <td>$140.00</td>
+                    <td>Aplica descuento por volumen automáticamente.</td>
+                </tr>
+                <tr>
+                    <td><strong>Promoción Miércoles</strong></td>
+                    <td>1 Paquete (Miércoles)</td>
+                    <td>$130.00</td>
+                    <td>El cron del miércoles activa $130.00 solo ese día.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 style="font-size: 1.05rem; color: #1e293b; margin-top: 24px;">Ejemplo B: Producto a Granel (Bocadín Granel por Kg)</h3>
+        <table class="rdd-table">
+            <thead>
+                <tr>
+                    <th>Nivel de Precio</th>
+                    <th>Condición / Cantidad</th>
+                    <th>Precio Capturado</th>
+                    <th>Efecto en Sucursales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Precio Base Kg</strong></td>
+                    <td>1.0 Kg</td>
+                    <td>$159.00</td>
+                    <td>El POS prorratea exacto para 250g, 500g, etc.</td>
+                </tr>
+                <tr>
+                    <td><strong>Mayoreo Granel</strong></td>
+                    <td>A partir de 3.0 Kg</td>
+                    <td>$145.00</td>
+                    <td>Aplica al cliente que compra 3 kilos o más.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PREGUNTAS FRECUENTES -->
+    <div class="rdd-card" style="padding: 24px;">
+        <h2 style="color: #714B67; font-size: 1.3rem; margin-top: 0;">5. Preguntas Frecuentes (FAQ)</h2>
+
+        <div style="margin-bottom: 16px;">
+            <strong style="color: #1e293b;">&iquest;Qué pasa si creamos una lista de precios nueva en Odoo?</strong>
+            <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                Aparecerá inmediatamente en el buscador de <em>"Listas Base Destino"</em> del asistente. Además, si la lista nueva hereda de la Base Común, ¡ni siquiera tienes que seleccionarla! Ya tendrá los precios de todos los productos por herencia.
+            </p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <strong style="color: #1e293b;">&iquest;El asistente borra o duplica precios existentes?</strong>
+            <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                No. El asistente busca si el producto ya cuenta con una regla en esa lista. Si ya existe, actualiza el valor sin crear renglones duplicados; si no existe, la crea limpia.
+            </p>
+        </div>
+
+        <div>
+            <strong style="color: #1e293b;">&iquest;Funciona con el cambio de precios por cron de los días de la semana?</strong>
+            <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+                Sí, se integra al 100% con <code>rdd_module</code>. Al registrar el precio en las listas de promoción (ej. Lunes/Miércoles), el cron nocturno cambia la caja automáticamente el día correspondiente.
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
