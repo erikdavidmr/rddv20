@@ -22,7 +22,7 @@
                     <div class="position-relative">
                         <i class="fa fa-search search-icon" aria-hidden="true"/>
                         <input type="text"
-                               t-ref="searchInput"
+                               t-ref="this.searchInputRef"
                                class="form-control search-input"
                                placeholder="Escanea código de barras o escribe nombre / código..."
                                t-att-value="state.searchQuery"
@@ -109,7 +109,7 @@
                                     <span class="input-group-text fw-bold fs-4 bg-light">$</span>
                                     <input type="number"
                                            step="any"
-                                           t-ref="moneyInput"
+                                           t-ref="this.moneyInputRef"
                                            class="form-control calc-input"
                                            placeholder="Ej. 50"
                                            t-att-value="state.inputMoney"
@@ -145,7 +145,7 @@
                                 <div class="input-group mb-2">
                                     <input type="number"
                                            step="any"
-                                           t-ref="qtyInput"
+                                           t-ref="this.qtyInputRef"
                                            class="form-control calc-input"
                                            t-att-placeholder="state.selectedProduct.is_weight ? '0.250' : '1'"
                                            t-att-value="state.inputQty"

@@ -1,4 +1,4 @@
-import { Component, useState, onMounted, useRef } from "@odoo/owl";
+import { Component, proxy, onMounted, useProps, signal, t } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -8,17 +8,19 @@ import { _t } from "@web/core/l10n/translation";
 export class PriceCalculatorPopup extends Component {
     static template = "pos_price_checker_calculator.PriceCalculatorPopup";
     static components = { Dialog };
+    props = useProps({
+        close: t.function(),
+    });
+
+    searchInputRef = signal.ref();
+    moneyInputRef = signal.ref();
+    qtyInputRef = signal.ref();
 
     setup() {
         this.pos = usePos();
-        this.orm = useService("orm");
         this.notification = useService("notification");
 
-        this.searchInputRef = useRef("searchInput");
-        this.moneyInputRef = useRef("moneyInput");
-        this.qtyInputRef = useRef("qtyInput");
-
-        this.state = useState({
+        this.state = proxy({
             searchQuery: "",
             isSearching: false,
             searchResults: [],
@@ -37,9 +39,12 @@ export class PriceCalculatorPopup extends Component {
         useHotkey("enter", () => this.onEnterPress());
 
         onMounted(() => {
-            if (this.searchInputRef.el) {
-                this.searchInputRef.el.focus();
-            }
+            setTimeout(() => {
+                const el = this.searchInputRef();
+                if (el) {
+                    el.focus();
+                }
+            }, 100);
         });
     }
 
@@ -81,15 +86,10 @@ export class PriceCalculatorPopup extends Component {
             const order = this.pos.getOrder();
             const pricelistId = order?.pricelist_id?.id || false;
 
-            const results = await this.orm.call(
+            const results = await this.pos.data.call(
                 "product.product",
                 "search_price_calculator_products",
-                [],
-                {
-                    query: query,
-                    pricelist_id: pricelistId,
-                    limit: 12,
-                }
+                [query, pricelistId, false, 12]
             );
 
             this.state.searchResults = results || [];
@@ -128,9 +128,10 @@ export class PriceCalculatorPopup extends Component {
 
         // Auto enfocar el campo de dinero para cálculo rápido
         setTimeout(() => {
-            if (this.moneyInputRef.el) {
-                this.moneyInputRef.el.focus();
-                this.moneyInputRef.el.select();
+            const el = this.moneyInputRef();
+            if (el) {
+                el.focus();
+                el.select();
             }
         }, 100);
     }
@@ -139,11 +140,10 @@ export class PriceCalculatorPopup extends Component {
         try {
             const order = this.pos.getOrder();
             const pricelistId = order?.pricelist_id?.id || false;
-            const fullSibling = await this.orm.call(
+            const fullSibling = await this.pos.data.call(
                 "product.product",
                 "get_price_calculator_product_by_id",
-                [sibling.id],
-                { pricelist_id: pricelistId }
+                [sibling.id, pricelistId]
             );
             if (fullSibling) {
                 this.selectProduct(fullSibling);
@@ -165,8 +165,9 @@ export class PriceCalculatorPopup extends Component {
         this.state.leftoverMoney = 0;
 
         setTimeout(() => {
-            if (this.searchInputRef.el) {
-                this.searchInputRef.el.focus();
+            const el = this.searchInputRef();
+            if (el) {
+                el.focus();
             }
         }, 100);
     }
