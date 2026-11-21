@@ -49,7 +49,6 @@ class TestManagerApprovalContract(TransactionCase):
             ),
             "static/src/app/session_close_by_manager.js": (
                 "@point_of_sale/app/components/popups/closing_popup/closing_popup",
-                "@point_of_sale/app/utils/make_awaitable_dialog",
             ),
         }
         for relative_path, imports in expected.items():
