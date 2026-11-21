@@ -145,6 +145,9 @@ patch(OrderSummary.prototype, {
         }
 
         // Obtener lista de managers disponibles
+        if (!this.pos.models["hr.employee"]) {
+            return true;
+        }
         const employeesList = this.pos.models["hr.employee"].getAll().filter(
             (employee) => employee._role === "manager"
         );

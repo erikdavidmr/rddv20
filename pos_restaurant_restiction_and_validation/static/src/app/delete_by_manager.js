@@ -80,6 +80,9 @@ patch(PosStore.prototype, {
         }
 
         // Obtener lista de managers disponibles
+        if (!this.models["hr.employee"]) {
+            return true;
+        }
         const employeesList = this.models["hr.employee"].getAll().filter(
             (employee) => employee._role === "manager"
         );

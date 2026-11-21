@@ -323,11 +323,15 @@ export class SessionCloseTemplateDialog extends Component {
 }
 
 // Patch del ClosePosPopup para interceptar el clic en "Close Register"
-// Patch del ClosePosPopup para interceptar el clic en "Close Register"
 patch(ClosePosPopup.prototype, {
     async confirm() {
         console.log("[ClosePosPopup] Interceptando confirm() - botón Close Register presionado");
         
+        // Si no está habilitado pos_hr o la restricción de cierre, proceder directo con el cierre nativo
+        if (!this.pos.config.module_pos_hr || !this.pos.config.enable_restriction_on_session_close) {
+            return super.confirm(...arguments);
+        }
+
         // Obtener datos de la sesión actual antes de continuar
         const sessionData = this.getSessionDataForTemplate();
         
@@ -337,7 +341,7 @@ patch(ClosePosPopup.prototype, {
         if (managerValidationResult?.confirmed) {
             console.log("[ClosePosPopup] Manager validado, saltando template y procediendo directo al cierre");
 
-            // Registrar la aprobación del manager en el backend
+            // Registrar la aprobación del manager en el backend si pos_hr está activo
             const approvalRegistered = await this.registerManagerApproval(managerValidationResult);
             if (!approvalRegistered) {
                 return;
@@ -386,6 +390,16 @@ patch(ClosePosPopup.prototype, {
     async showManagerValidation() {
         console.log("[ClosePosPopup] Iniciando validación de manager");
 
+        if (!this.pos.config.module_pos_hr || !this.pos.config.enable_restriction_on_session_close) {
+            return { confirmed: true };
+        }
+
+        const employeeModel = this.pos.models["hr.employee"];
+        if (!employeeModel) {
+            console.log("[ClosePosPopup] hr.employee model no disponible o pos_hr no activo, saltando validación");
+            return { confirmed: true };
+        }
+
         // Obtener lista de managers
         const configId = this.pos.config.id;
         const managers = this.pos.models["hr.employee"].getAll().filter(
@@ -396,7 +410,7 @@ patch(ClosePosPopup.prototype, {
 
         if (!managers.length) {
             console.log("[ClosePosPopup] No hay managers configurados, saltando validación");
-            return { confirmed: false };
+            return { confirmed: true };
         }
 
         // Mostrar diálogo de selección de manager
