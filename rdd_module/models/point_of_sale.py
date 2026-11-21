@@ -16,5 +16,42 @@ class InheritPosConfig(models.Model):
             params['product_product']['fields'].append('puc_multicompany')
         return params
     
-    #rec.consecutive = self.env['ir.sequence'].next_by_code('rdd_module.consecutive.empresarial')
 
+class PosPaymentMethod(models.Model):
+    _inherit = 'pos.payment.method'
+
+    def _create_bank_payment_line(self, session, amount, account=None, message=None, partner=None, foreign_currency=None, amount_currency=None):
+        if not self.outstanding_account_id:
+            chart_template = self.with_context(allowed_company_ids=self.company_id.root_id.ids).env['account.chart.template']
+            fallback_account = (
+                chart_template.ref('account_journal_payment_debit_account_id', raise_if_not_found=False)
+                or self.company_id.transfer_account_id
+                or self.journal_id.default_account_id
+            )
+            if fallback_account:
+                self.env.cr.execute(
+                    "UPDATE pos_payment_method SET outstanding_account_id = %s WHERE id = %s",
+                    (fallback_account.id, self.id),
+                )
+                self.invalidate_recordset(['outstanding_account_id'])
+        return super()._create_bank_payment_line(session, amount, account, message, partner, foreign_currency, amount_currency)
+
+
+class PosSession(models.Model):
+    _inherit = 'pos.session'
+
+    def _create_session_account_move(self, orders):
+        for pm in orders.payment_ids.payment_method_id.filtered(lambda p: p.type == 'bank' and not p.outstanding_account_id):
+            chart_template = self.with_context(allowed_company_ids=pm.company_id.root_id.ids).env['account.chart.template']
+            fallback_account = (
+                chart_template.ref('account_journal_payment_debit_account_id', raise_if_not_found=False)
+                or pm.company_id.transfer_account_id
+                or pm.journal_id.default_account_id
+            )
+            if fallback_account:
+                self.env.cr.execute(
+                    "UPDATE pos_payment_method SET outstanding_account_id = %s WHERE id = %s",
+                    (fallback_account.id, pm.id),
+                )
+                pm.invalidate_recordset(['outstanding_account_id'])
+        return super()._create_session_account_move(orders)
