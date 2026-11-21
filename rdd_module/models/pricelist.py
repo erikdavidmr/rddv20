@@ -72,7 +72,10 @@ class InheritProductPricelist(models.Model):
 
         # Convertimos todo a strings separados por coma
         nombre_pos = ', '.join(nombre_pos_list)
-        emails = ', '.join(set(emails_list))  # set() elimina correos duplicados
+        emails = ', '.join({e for e in emails_list if e and isinstance(e, str) and e.strip()})
+        if not emails:
+            _logger.info("No hay correos validos para notificar actualizacion de lista de precios.")
+            return
 
         _logger.info(f"Empleados para POS '{nombre_pos}': {emails}")
 
@@ -109,7 +112,10 @@ class InheritProductPricelist(models.Model):
 
         # Convertimos todo a strings separados por coma
         nombre_pos = ', '.join(nombre_pos_list)
-        emails = ', '.join(set(emails_list))  # set() elimina correos duplicados
+        emails = ', '.join({e for e in emails_list if e and isinstance(e, str) and e.strip()})
+        if not emails:
+            _logger.info("No hay correos validos para notificar cajas abiertas.")
+            return
 
         _logger.info(f"Empleados para POS '{nombre_pos}': {emails}")
 
