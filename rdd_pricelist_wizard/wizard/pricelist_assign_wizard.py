@@ -121,10 +121,10 @@ class RddPricelistAssignWizard(models.TransientModel):
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
         product_tmpl_id = res.get('product_tmpl_id')
-        if not product_tmpl_id and self._context.get('default_product_tmpl_id'):
-            product_tmpl_id = self._context.get('default_product_tmpl_id')
-        elif not product_tmpl_id and self._context.get('active_id'):
-            product_tmpl_id = self._context.get('active_id')
+        if not product_tmpl_id and self.env.context.get('default_product_tmpl_id'):
+            product_tmpl_id = self.env.context.get('default_product_tmpl_id')
+        elif not product_tmpl_id and self.env.context.get('active_id'):
+            product_tmpl_id = self.env.context.get('active_id')
 
         if product_tmpl_id:
             tmpl = self.env['product.template'].browse(product_tmpl_id)
@@ -161,7 +161,6 @@ class RddPricelistAssignWizard(models.TransientModel):
             if rec.product_tmpl_id:
                 rec.product_uom_id = rec.product_tmpl_id.uom_id
                 rec.currency_id = rec.product_tmpl_id.currency_id
-                # Si rdd_module tiene puc_field o puc_multicompany, usarlo; sino standard_price
                 cost = getattr(rec.product_tmpl_id, 'puc_field', 0.0) or getattr(rec.product_tmpl_id, 'puc_multicompany', 0.0) or rec.product_tmpl_id.standard_price or 0.0
                 rec.cost_price = cost
                 rec.current_sale_price = rec.product_tmpl_id.list_price or 0.0
@@ -175,7 +174,6 @@ class RddPricelistAssignWizard(models.TransientModel):
     def _compute_margins(self):
         for rec in self:
             cost = rec.cost_price or 0.0
-            # Margen = (Precio - Costo) / Precio * 100
             rec.regular_margin = ((rec.regular_price - cost) / rec.regular_price * 100.0) if rec.regular_price > 0 else 0.0
             rec.wholesale_margin = ((rec.wholesale_price - cost) / rec.wholesale_price * 100.0) if rec.wholesale_price > 0 else 0.0
             rec.promo_margin = ((rec.promo_price - cost) / rec.promo_price * 100.0) if rec.promo_price > 0 else 0.0
@@ -213,10 +211,11 @@ class RddPricelistAssignWizard(models.TransientModel):
                 elif comp == 'markup':
                     price_str = f"+{abs(it.price_discount)}% (Margen)"
                 else:
-                    price_str = comp
+                    price_str = str(comp)
 
                 pl_name = it.pricelist_id.name or 'Sin Nombre'
-                min_q = f"{it.min_quantity:g} {it.product_uom_id.name or rec.product_uom_id.name or 'u'}"
+                uom_name = it.product_tmpl_id.uom_id.name or rec.product_uom_id.name or 'u'
+                min_q = f"{it.min_quantity:g} {uom_name}"
                 dates = ""
                 if it.date_start or it.date_end:
                     d_from = str(it.date_start)[:10] if it.date_start else "Inicio"
@@ -264,7 +263,6 @@ class RddPricelistAssignWizard(models.TransientModel):
 
         # 1. Asignar reglas en Listas Base / Destino
         for pl in self.target_pricelist_ids:
-            # Regla Regular (min_quantity <= 1.0 y sin fechas específicas)
             existing_reg = PricelistItem.search([
                 ('pricelist_id', '=', pl.id),
                 ('product_tmpl_id', '=', self.product_tmpl_id.id),
@@ -291,7 +289,6 @@ class RddPricelistAssignWizard(models.TransientModel):
                 })
                 created_count += 1
 
-            # Regla Mayoreo
             if self.apply_wholesale and self.wholesale_price > 0 and self.wholesale_min_qty > 1.0:
                 existing_wh = PricelistItem.search([
                     ('pricelist_id', '=', pl.id),
@@ -318,7 +315,7 @@ class RddPricelistAssignWizard(models.TransientModel):
                     })
                     created_count += 1
 
-        # 2. Asignar reglas en Listas de Promoción (Miércoles / Días especiales)
+        # 2. Asignar reglas en Listas de Promoción
         if self.apply_promo and self.promo_price > 0:
             for pl in self.promo_pricelist_ids:
                 existing_promo = PricelistItem.search([
@@ -344,7 +341,7 @@ class RddPricelistAssignWizard(models.TransientModel):
                     })
                     created_count += 1
 
-        # 3. Actualizar el precio de lista base del producto en la ficha
+        # 3. Actualizar el precio de lista base del producto
         self.product_tmpl_id.write({
             'list_price': self.regular_price,
         })
