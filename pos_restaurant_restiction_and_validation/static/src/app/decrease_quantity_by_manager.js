@@ -48,7 +48,7 @@ patch(OrderSummary.prototype, {
                 return super.updateSelectedOrderline(...arguments);
             }
 
-            const product = selectedLine.getProduct();
+            const product = selectedLine.getProduct ? selectedLine.getProduct() : selectedLine.product_id;
             if (!product) {
                 return super.updateSelectedOrderline(...arguments);
             }
@@ -76,7 +76,8 @@ patch(OrderSummary.prototype, {
             return false;
         }
 
-        if (this.pos.accessRight.cashier?._role !== 'cashier') {
+        // Si el usuario logueado en caja es manager, no necesita pedir aprobación
+        if (this.pos.accessRight.cashier?._role === 'manager') {
             return false;
         }
 
@@ -86,15 +87,15 @@ patch(OrderSummary.prototype, {
         }
 
         return orderlines.some(line => {
-            const lineProduct = line.getProduct();
+            const lineProduct = line.getProduct ? line.getProduct() : line.product_id;
             return lineProduct && lineProduct.id === productId;
         });
     },
 
     async _requestManagerApproval(product, selectedLine, order) {
         const productName = product.display_name || product.name || _t("Producto");
-        const qty = selectedLine ? selectedLine.get_quantity() : 1;
-        const price = selectedLine ? selectedLine.get_display_price() : 0;
+        const qty = selectedLine ? (selectedLine.getQuantity ? selectedLine.getQuantity() : selectedLine.qty) : 1;
+        const price = selectedLine ? (selectedLine.price_subtotal_incl || (selectedLine.prices?.total_included) || selectedLine.price_unit || 0) : 0;
 
         // 1. Mostrar diálogo de autorización híbrido (PIN o OTP Remoto)
         const actionChoice = await makeAwaitable(this.dialog, DenyPopup, {

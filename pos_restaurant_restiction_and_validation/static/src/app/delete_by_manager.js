@@ -36,12 +36,12 @@ patch(PosStore.prototype, {
         if (!this.config.enable_pos_restaurant_restiction || !this.config.enable_restriction_on_order_delete) {
             return false;
         }
-        return this.cashier?._role === 'cashier';
+        return this.cashier?._role !== 'manager';
     },
 
     async _requestManagerApproval(order) {
         const orderName = order ? (order.name || order.tracking_number || _t("Orden")) : _t("Orden");
-        const total = order ? order.get_total_with_tax() : 0;
+        const total = order ? (order.get_total_with_tax ? order.get_total_with_tax() : (order.prices?.total_included || 0)) : 0;
         const details = _t("Cancelación de ticket completo: %s (Total: $%s)", orderName, total);
 
         // 1. Mostrar diálogo con opción de PIN o Código OTP Remoto
