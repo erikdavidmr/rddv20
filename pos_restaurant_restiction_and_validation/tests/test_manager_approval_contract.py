@@ -10,7 +10,7 @@ class TestManagerApprovalContract(TransactionCase):
             "enable_restriction_on_order_delete", "enable_restriction_on_session_close",
         }
         self.assertTrue(config_fields <= set(self.env["pos.config"]._fields))
-        audit_fields = {"session_id", "manager_approved", "cashier", "state", "receipt_number", "order_number"}
+        audit_fields = {"session_id", "manager_approved", "cashier", "state", "receipt_number", "order_number", "company_id"}
         self.assertTrue(audit_fields <= set(self.env["manager.approval"]._fields))
         setting_fields = {
             "is_pos_restaurant_restiction", "is_restriction_on_orderline_delete",
@@ -31,6 +31,10 @@ class TestManagerApprovalContract(TransactionCase):
             self.assertEqual(access.model_id.model, "manager.approval")
             self.assertEqual(access.group_id, pos_user_group)
             self.assertEqual(access.operation, "crud")
+
+        mc_rule = self.env.ref("pos_restaurant_restiction_and_validation.rule_manager_approval_multi_company")
+        self.assertEqual(mc_rule.model_id.model, "manager.approval")
+        self.assertIn("company_ids", mc_rule.domain)
 
     def test_pos_scripts_import_the_odoo_20_component_modules(self):
         addon = Path(__file__).parents[1]

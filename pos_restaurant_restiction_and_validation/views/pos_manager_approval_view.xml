@@ -20,6 +20,7 @@
                         <field name="manager_approved" />
                         <field name="cashier" />
                         <field name="state" />
+                        <field name="company_id" groups="base.group_multi_company" />
                         <field name="is_otp" />
                         <field name="otp_code" invisible="not is_otp" />
                     </group>
@@ -36,10 +37,11 @@
                 <field name="session_id" />
                 <field name="receipt_number" />
                 <field name="order_number" />
-                <field name="manager_approved" widget="many2one_avatar_user" />
-                <field name="cashier" widget="many2one_avatar_user" />
+                <field name="manager_approved" />
+                <field name="cashier" />
                 <field name="state" widget="badge" decoration-info="state == 'session_close'"
                     decoration-danger="state == 'orderline_deleted'" />
+                <field name="company_id" groups="base.group_multi_company" optional="show" />
                 <field name="is_otp" string="Vía OTP Remoto" widget="boolean" optional="show" />
                 <field name="otp_code" optional="hide" />
             </list>
@@ -54,6 +56,7 @@
                 <field name="session_id"/>
                 <field name="cashier"/>
                 <field name="manager_approved"/>
+                <field name="company_id" groups="base.group_multi_company"/>
                 <filter string="Autorizado vía OTP Remoto" name="filter_is_otp" domain="[('is_otp', '=', True)]"/>
                 <filter string="State" name="group_by_state" context="{'group_by':'state'}"/>
             </search>
