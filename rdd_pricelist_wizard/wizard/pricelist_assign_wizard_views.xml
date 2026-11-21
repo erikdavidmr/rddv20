@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_rdd_pricelist_assign_wizard_form" model="ir.ui.view">
+        <field name="name">rdd.pricelist.assign.wizard.form</field>
+        <field name="model">rdd.pricelist.assign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Asignación Rápida de Precios">
+                <sheet>
+                    <div class="oe_title">
+                        <h2>
+                            <field name="product_tmpl_id" readonly="1" options="{'no_open': True}"/>
+                        </h2>
+                    </div>
+
+                    <group>
+                        <group string="Datos del Producto">
+                            <field name="product_uom_id"/>
+                            <field name="currency_id" invisible="1"/>
+                            <label for="cost_price" string="Costo de Referencia (PUC)"/>
+                            <div class="o_row">
+                                <field name="cost_price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                            <label for="current_sale_price" string="Precio Venta en Ficha"/>
+                            <div class="o_row">
+                                <field name="current_sale_price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                        </group>
+                        <group string="Precio Regular / Menudeo">
+                            <label for="regular_price" string="Precio Menudeo / Base"/>
+                            <div class="o_row">
+                                <field name="regular_price" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_inline font-weight-bold fs-5"/>
+                                <span class="text-muted ms-2">/ <field name="product_uom_id" class="oe_inline"/></span>
+                            </div>
+                            <field name="regular_margin" widget="percentage" decoration-success="regular_margin &gt;= 30" decoration-warning="regular_margin &lt; 30 and regular_margin &gt; 15" decoration-danger="regular_margin &lt;= 15"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Mayoreo y Promociones" name="pricing_options">
+                            <group>
+                                <group string="1. Escala de Mayoreo">
+                                    <field name="apply_wholesale"/>
+                                    <label for="wholesale_price" string="Precio Mayoreo" invisible="not apply_wholesale"/>
+                                    <div class="o_row" invisible="not apply_wholesale">
+                                        <field name="wholesale_price" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_inline"/>
+                                        <span class="text-muted ms-2">a partir de</span>
+                                        <field name="wholesale_min_qty" class="oe_inline ms-1"/>
+                                        <span class="text-muted"><field name="product_uom_id" class="oe_inline"/></span>
+                                    </div>
+                                    <field name="wholesale_margin" widget="percentage" invisible="not apply_wholesale" decoration-success="wholesale_margin &gt;= 20" decoration-warning="wholesale_margin &lt; 20 and wholesale_margin &gt; 10" decoration-danger="wholesale_margin &lt;= 10"/>
+                                </group>
+
+                                <group string="2. Precio Promoción (Miércoles)">
+                                    <field name="apply_promo"/>
+                                    <label for="promo_price" string="Precio Promoción" invisible="not apply_promo"/>
+                                    <div class="o_row" invisible="not apply_promo">
+                                        <field name="promo_price" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_inline font-weight-bold text-danger"/>
+                                        <span class="text-muted ms-2">/ <field name="product_uom_id" class="oe_inline"/></span>
+                                    </div>
+                                    <field name="promo_margin" widget="percentage" invisible="not apply_promo"/>
+                                    <field name="promo_pricelist_ids" widget="many2many_tags" invisible="not apply_promo" placeholder="Seleccione las listas de promoción..."/>
+                                </group>
+                            </group>
+
+                            <group string="Listas Base Destino (Se propagan a sucursales)">
+                                <field name="target_pricelist_ids" widget="many2many_tags" placeholder="Listas base donde se guardará este precio..."/>
+                            </group>
+                        </page>
+
+                        <page string="Precios Actuales del Producto" name="existing_rules_page">
+                            <field name="existing_rules_html" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <footer>
+                    <button name="action_apply_prices" string="Guardar y Asignar Precios" type="object" class="btn-primary" icon="fa-check"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_rdd_pricelist_assign_wizard" model="ir.actions.act_window">
+        <field name="name">Asignador Rápido de Precios</field>
+        <field name="res_model">rdd.pricelist.assign.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+</odoo>
