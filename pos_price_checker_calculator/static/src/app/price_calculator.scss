@@ -1,0 +1,169 @@
+.pos-price-calculator-dialog {
+    max-width: 780px !important;
+    width: 95vw !important;
+
+    .calculator-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+
+    .search-section {
+        position: relative;
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+        .search-input {
+            padding-left: 2.8rem;
+            font-size: 1.15rem;
+            height: 48px;
+            border-radius: 8px;
+            border: 2px solid #cbd5e1;
+            &:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            }
+        }
+    }
+
+    .search-results-dropdown {
+        max-height: 220px;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        background: white;
+
+        .result-item {
+            cursor: pointer;
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s ease;
+            &:hover, &.active {
+                background: #eff6ff;
+            }
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+
+    .product-detail-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+
+        .product-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .product-price-badge {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #059669;
+        }
+
+        .tax-note {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+    }
+
+    .presentation-pills {
+        .pill-btn {
+            background: #ffffff;
+            border: 1.5px solid #0284c7;
+            color: #0369a1;
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            &:hover {
+                background: #0284c7;
+                color: #ffffff;
+            }
+            &.active {
+                background: #0284c7;
+                color: #ffffff;
+                box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+            }
+        }
+    }
+
+    .calc-box {
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem;
+        transition: border-color 0.2s ease;
+
+        &:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .calc-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 0.4rem;
+        }
+
+        .calc-input {
+            font-size: 1.6rem;
+            font-weight: 700;
+            height: 52px;
+            text-align: right;
+            border-radius: 6px;
+        }
+
+        .calc-result-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+            min-height: 24px;
+        }
+    }
+
+    .quick-weight-btn {
+        font-weight: 700;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        padding: 0.5rem 0.8rem;
+        border: 1.5px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+        transition: all 0.15s ease;
+        &:hover {
+            border-color: #059669;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+    }
+
+    .btn-add-ticket {
+        background: #059669;
+        border-color: #059669;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        &:hover {
+            background: #047857;
+            border-color: #047857;
+        }
+    }
+}

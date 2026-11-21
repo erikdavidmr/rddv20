@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_price_checker_calculator.PriceCalculatorPopup">
+        <Dialog contentClass="'pos-price-calculator-dialog'">
+            <t t-set-slot="header">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <div>
+                        <h4 class="m-0 fw-bold d-flex align-items-center gap-2">
+                            <i class="fa fa-calculator text-primary" aria-hidden="true"/>
+                            <span>Calculadora y Buscador de Precios</span>
+                            <span class="badge bg-primary fs-6">F4</span>
+                        </h4>
+                        <small class="text-muted">Consulta rápida sin alterar el ticket ni requerir autorización de gerente</small>
+                    </div>
+                </div>
+            </t>
+
+            <div class="price-calculator-body d-flex flex-column gap-3">
+                <!-- Buscador rápido por código de barras o texto -->
+                <div class="search-section">
+                    <div class="position-relative">
+                        <i class="fa fa-search search-icon" aria-hidden="true"/>
+                        <input type="text"
+                               t-ref="searchInput"
+                               class="form-control search-input"
+                               placeholder="Escanea código de barras o escribe nombre / código..."
+                               t-att-value="state.searchQuery"
+                               t-on-input="onSearchInput"
+                               t-on-keydown="onSearchKeyDown"/>
+                        <span t-if="state.isSearching" class="position-absolute end-0 top-50 translate-middle-y me-3">
+                            <i class="fa fa-spinner fa-spin text-primary"/>
+                        </span>
+                    </div>
+
+                    <!-- Lista desplegable de sugerencias de búsqueda -->
+                    <div t-if="state.searchResults.length > 0" class="search-results-dropdown mt-1 position-relative">
+                        <t t-foreach="state.searchResults" t-as="item" t-key="item.id">
+                            <div class="result-item d-flex align-items-center justify-content-between"
+                                 t-on-click="() => this.selectProduct(item)">
+                                <div>
+                                    <span class="fw-bold text-dark" t-out="item.name"/>
+                                    <span t-if="item.default_code" class="badge bg-light text-secondary ms-2" t-out="item.default_code"/>
+                                    <span t-if="item.is_weight" class="badge bg-warning text-dark ms-1">A Granel</span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold text-success fs-5" t-out="formatCurrency(item.price_incl)"/>
+                                    <small class="text-muted d-block" t-out="'/ ' + item.uom_name"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Detalle y Calculadora de Producto Seleccionado -->
+                <div t-if="state.selectedProduct" class="d-flex flex-column gap-3">
+                    <!-- Ficha del Producto -->
+                    <div class="product-detail-card d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <span class="product-title" t-out="state.selectedProduct.name"/>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span t-if="state.selectedProduct.default_code" class="badge bg-secondary" t-out="state.selectedProduct.default_code"/>
+                                    <span t-if="state.selectedProduct.barcode" class="badge bg-light text-dark border">
+                                        <i class="fa fa-barcode me-1"/> <t t-out="state.selectedProduct.barcode"/>
+                                    </span>
+                                    <span t-if="state.selectedProduct.is_weight" class="badge bg-warning text-dark">
+                                        ⚖️ Venta a Granel / Peso
+                                    </span>
+                                    <span t-else="" class="badge bg-info text-white">
+                                        📦 Unidad / Paquete
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="product-price-badge" t-out="formatCurrency(state.selectedProduct.price_incl)"/>
+                                <div class="tax-note">Precio x <strong t-out="state.selectedProduct.uom_name"/> (Impuestos Incl.)</div>
+                            </div>
+                        </div>
+
+                        <!-- Presentaciones Hermanas (Granel vs Paquete vs Caja) -->
+                        <div t-if="state.selectedProduct.siblings.length > 0" class="presentation-pills mt-2 pt-2 border-top">
+                            <div class="small fw-bold text-muted mb-1">
+                                🔄 Otras presentaciones disponibles:
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <t t-foreach="state.selectedProduct.siblings" t-as="sib" t-key="sib.id">
+                                    <button type="button"
+                                            class="pill-btn d-flex align-items-center gap-1"
+                                            t-on-click="() => this.onSelectSibling(sib)">
+                                        <span t-out="sib.is_weight ? '⚖️' : '📦'"/>
+                                        <span t-out="sib.name"/>
+                                        <strong class="ms-1" t-out="formatCurrency(sib.price_incl)"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculadora Bidireccional -->
+                    <div class="row g-3">
+                        <!-- Columna 1: Por Dinero ($) -->
+                        <div class="col-12 col-md-6">
+                            <div class="calc-box d-flex flex-column h-100">
+                                <label class="calc-label d-flex align-items-center justify-content-between">
+                                    <span>💵 Presupuesto del Cliente ($ MXN):</span>
+                                </label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text fw-bold fs-4 bg-light">$</span>
+                                    <input type="number"
+                                           step="any"
+                                           t-ref="moneyInput"
+                                           class="form-control calc-input"
+                                           placeholder="Ej. 50"
+                                           t-att-value="state.inputMoney"
+                                           t-on-input="onMoneyInput"/>
+                                </div>
+                                <div class="calc-result-text mt-auto">
+                                    <t t-if="state.selectedProduct.is_weight">
+                                        <span class="text-primary">
+                                            👉 Equivale a: <strong class="fs-5" t-out="state.calculatedQty + ' Kg'"/>
+                                            <span class="text-muted" t-out="' (' + Math.round(state.calculatedQty * 1000) + ' gramos)'"/>
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-primary">
+                                            👉 Alcanza para: <strong class="fs-5" t-out="state.piecesFit + ' piezas'"/>
+                                            <small t-if="state.leftoverMoney > 0" class="d-block text-success">
+                                                (Sobran <strong t-out="formatCurrency(state.leftoverMoney)"/> de cambio)
+                                            </small>
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna 2: Por Peso / Cantidad -->
+                        <div class="col-12 col-md-6">
+                            <div class="calc-box d-flex flex-column h-100">
+                                <label class="calc-label d-flex align-items-center justify-content-between">
+                                    <span t-if="state.selectedProduct.is_weight">⚖️ Cantidad de Peso (Kg):</span>
+                                    <span t-else="">📦 Cantidad de Piezas:</span>
+                                    <span class="badge bg-light text-dark" t-out="state.selectedProduct.uom_name"/>
+                                </label>
+                                <div class="input-group mb-2">
+                                    <input type="number"
+                                           step="any"
+                                           t-ref="qtyInput"
+                                           class="form-control calc-input"
+                                           t-att-placeholder="state.selectedProduct.is_weight ? '0.250' : '1'"
+                                           t-att-value="state.inputQty"
+                                           t-on-input="onQtyInput"/>
+                                    <span class="input-group-text fw-bold bg-light" t-out="state.selectedProduct.is_weight ? 'Kg' : 'Pzs'"/>
+                                </div>
+
+                                <!-- Botones Rápidos de Gramos para Granel -->
+                                <div t-if="state.selectedProduct.is_weight" class="d-flex gap-1 mb-2">
+                                    <button type="button" class="btn quick-weight-btn flex-fill" t-on-click="() => this.setQuickWeight(100)">100g</button>
+                                    <button type="button" class="btn quick-weight-btn flex-fill" t-on-click="() => this.setQuickWeight(250)">250g</button>
+                                    <button type="button" class="btn quick-weight-btn flex-fill" t-on-click="() => this.setQuickWeight(500)">500g</button>
+                                    <button type="button" class="btn quick-weight-btn flex-fill" t-on-click="() => this.setQuickWeight(1000)">1 Kg</button>
+                                </div>
+
+                                <div class="calc-result-text mt-auto text-end">
+                                    <span class="text-muted me-1">Total a cobrar:</span>
+                                    <strong class="fs-4 text-success" t-out="formatCurrency(state.calculatedMoney)"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado Inicial / Instrucciones -->
+                <div t-else="" class="p-4 text-center bg-light rounded-3 border">
+                    <div class="fs-1 text-primary mb-2">
+                        <i class="fa fa-barcode" aria-hidden="true"/>
+                    </div>
+                    <h5 class="fw-bold text-dark">Consulta de Precios y Granel</h5>
+                    <p class="text-muted mb-0">
+                        Escanea un código de barras o escribe en el buscador para ver precios, presentaciones y hacer cálculos exactos en dinero o peso.
+                    </p>
+                </div>
+            </div>
+
+            <t t-set-slot="footer">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <button class="btn btn-secondary btn-lg" t-on-click="cancel">
+                        <i class="fa fa-times me-1"/> Cerrar (Esc)
+                    </button>
+
+                    <div class="d-flex gap-2" t-if="state.selectedProduct">
+                        <button class="btn btn-outline-secondary btn-lg" t-on-click="clearSelectedProduct">
+                            <i class="fa fa-refresh me-1"/> Buscar Otro
+                        </button>
+                        <button class="btn btn-success btn-lg fw-bold d-flex align-items-center gap-2"
+                                t-att-disabled="state.calculatedQty &lt;= 0"
+                                t-on-click="addToOrder">
+                            <i class="fa fa-cart-plus fs-5"/>
+                            <span>Agregar al Ticket:</span>
+                            <span class="badge bg-white text-success fs-6" t-out="state.calculatedQty + ' ' + (state.selectedProduct.is_weight ? 'Kg' : 'pzs')"/>
+                            <span>=</span>
+                            <span t-out="formatCurrency(state.calculatedMoney)"/>
+                            <span class="badge bg-dark text-white ms-1">Enter</span>
+                        </button>
+                    </div>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>
