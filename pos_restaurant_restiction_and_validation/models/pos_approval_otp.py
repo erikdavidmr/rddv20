@@ -160,10 +160,11 @@ class PosApprovalOtp(models.Model):
         """
         Valida el código ingresado:
         1. Primero busca si es un OTP temporal válido.
-        2. Si no es OTP, busca si coincide con el PIN permanente de algún manager.
+        2. Si no es OTP, busca si coincide con el PIN permanente de algún manager autorizado.
         """
         pin_str = str(entered_pin).strip()
         now = fields.Datetime.now()
+        config = self.env['pos.config'].browse(config_id)
 
         # 1. Verificar OTP Temporal
         otp = self.search([
@@ -202,34 +203,36 @@ class PosApprovalOtp(models.Model):
                 'manager_name': manager_emp.name if manager_emp else _("Gerente Remoto (OTP)"),
             }
 
-        # 2. Verificar PIN permanente de Gerente (en caso de que el manager esté presente)
+        # 2. Verificar PIN permanente de Gerente (Presencial)
         hashed_pin = hashlib.sha1(pin_str.encode('utf-8')).hexdigest()
-        
-        # Buscar empleados con rol manager de la misma compañía o global
-        managers = self.env['hr.employee'].search([
-            ('company_id', 'in', [self.env['pos.config'].browse(config_id).company_id.id, False]),
-            '|', ('pin', '=', pin_str), ('pin', '=', hashed_pin)
-        ])
-        
-        for manager in managers:
-            # Comprobar si tiene rol manager
-            if getattr(manager, '_role', False) == 'manager' or getattr(manager, 'user_has_group', lambda g: False)('point_of_sale.group_pos_manager'):
-                self.env['manager.approval'].create({
-                    'session_id': session_id,
-                    'cashier': cashier_id,
-                    'manager_approved': manager.id,
-                    'state': action_type,
-                    'receipt_number': receipt_number,
-                    'order_number': order_number,
-                    'is_otp': False,
-                    'otp_code': False,
-                })
-                return {
-                    'approved': True,
-                    'is_otp': False,
-                    'manager_id': manager.id,
-                    'manager_name': manager.name,
-                }
+
+        # Buscar en managers asignados a este POS
+        managers = config.manager_employee_ids.filtered(lambda m: m.pin in (pin_str, hashed_pin))
+        if not managers:
+            # Buscar en empleados de la misma compañía con rol manager
+            managers = self.env['hr.employee'].search([
+                ('company_id', 'in', [config.company_id.id, False]),
+                '|', ('pin', '=', pin_str), ('pin', '=', hashed_pin)
+            ]).filtered(lambda m: m.user_id and m.user_id.has_group('point_of_sale.group_pos_manager'))
+
+        if managers:
+            manager = managers[0]
+            self.env['manager.approval'].create({
+                'session_id': session_id,
+                'cashier': cashier_id,
+                'manager_approved': manager.id,
+                'state': action_type,
+                'receipt_number': receipt_number,
+                'order_number': order_number,
+                'is_otp': False,
+                'otp_code': False,
+            })
+            return {
+                'approved': True,
+                'is_otp': False,
+                'manager_id': manager.id,
+                'manager_name': manager.name,
+            }
 
         return {
             'approved': False,
