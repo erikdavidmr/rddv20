@@ -4,12 +4,10 @@
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
 import { PosAccessRightPlugin } from "@point_of_sale/app/plugins/access_right_plugin";
 import { Component, proxy, useProps, t, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { ask } from "@point_of_sale/app/utils/make_awaitable_dialog";
 
 patch(PosAccessRightPlugin.prototype, {
     get canCloseSession() {
@@ -22,43 +20,94 @@ patch(PosAccessRightPlugin.prototype, {
 
 export class ManagerSelectPopup extends Component {
     static template = xml`
-        <div class="popup">
-            <div class="header">
-                <t t-esc="this.props.title"/>
+        <div class="popup p-3">
+            <div class="header mb-3 border-bottom pb-2">
+                <h4 class="mb-0 text-primary"><i class="fa fa-lock me-2"/> <t t-esc="this.props.title"/></h4>
             </div>
             <div class="body">
-                <label class="form-label text-muted small">Gerente Responsable:</label>
-                <select t-model.proxy="this.state.selectedManagerId" class="form-select mb-3">
-                    <t t-foreach="this.props.managers" t-as="manager" t-key="manager.id">
-                        <option t-att-value="manager.id" t-esc="manager.name"/>
-                    </t>
-                </select>
-                <label class="form-label text-muted small">PIN del Gerente o Código Temporal OTP:</label>
-                <input type="password" t-model.proxy="this.state.pin" class="form-control mb-3" placeholder="Ingrese PIN o Código OTP" t-on-keyup="this._onPinKeyup"/>
+                <!-- Resumen de Arqueo para Transparencia Total -->
+                <div class="card mb-3 bg-light border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="row text-center">
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block">Esperado</small>
+                                <span class="fw-bold fs-6 text-dark"><t t-esc="this.cashExpected"/></span>
+                            </div>
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block">Contado</small>
+                                <span class="fw-bold fs-6 text-dark"><t t-esc="this.cashCounted"/></span>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Diferencia</small>
+                                <span t-att-class="this.diffClass" class="fw-bold fs-6">
+                                    <t t-esc="this.diffText"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 text-center">
+                    <label class="form-label fw-bold text-secondary mb-1">
+                        Ingrese PIN de Gerente o Código Temporal OTP:
+                    </label>
+                    <input type="password" 
+                           t-model.proxy="this.state.pin" 
+                           class="form-control form-control-lg text-center fs-4 fw-bold letter-spacing-lg" 
+                           placeholder="••••" 
+                           autofocus="1" 
+                           t-on-keyup="this._onPinKeyup"/>
+                    <small class="text-muted d-block mt-1">
+                        Si el gerente no está en la sucursal, solicite un código temporal remoto.
+                    </small>
+                </div>
             </div>
-            <div class="footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div class="footer d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
                 <div class="d-flex gap-2">
-                    <button t-on-click="this.confirm" class="btn btn-primary">Confirmar</button>
-                    <button t-on-click="this.requestRemoteOtp" class="btn btn-info text-white">
+                    <button t-on-click="this.confirm" class="btn btn-primary px-3">
+                        <i class="fa fa-key me-1"/> Confirmar Cierre
+                    </button>
+                    <button t-on-click="this.requestRemoteOtp" class="btn btn-info text-white px-3">
                         <i class="fa fa-paper-plane me-1"/> Solicitar Código Remoto
                     </button>
                 </div>
-                <button t-on-click="this.cancel" class="btn btn-secondary">Cancelar</button>
+                <button t-on-click="this.cancel" class="btn btn-secondary px-3">
+                    Cancelar
+                </button>
             </div>
         </div>`;
 
     props = useProps({
         title: t.string().optional(""),
         managers: t.array(),
+        sessionData: t.object().optional({}),
         onConfirm: t.function(),
     });
 
     setup() {
-        console.log("[ManagerSelectPopup] Setup iniciado");
         this.state = proxy({
-            selectedManagerId: this.props.managers[0]?.id || null,
             pin: "",
         });
+    }
+
+    get cashExpected() {
+        return this.env.utils.formatCurrency(this.props.sessionData?.cashData?.expected || 0);
+    }
+
+    get cashCounted() {
+        return this.env.utils.formatCurrency(this.props.sessionData?.cashData?.counted || 0);
+    }
+
+    get diffClass() {
+        const diff = this.props.sessionData?.cashData?.difference || 0;
+        if (diff === 0) return "text-success";
+        return diff > 0 ? "text-warning" : "text-danger";
+    }
+
+    get diffText() {
+        const diff = this.props.sessionData?.cashData?.difference || 0;
+        return this.env.utils.formatCurrency(diff);
     }
 
     _onPinKeyup(ev) {
@@ -67,15 +116,31 @@ export class ManagerSelectPopup extends Component {
         }
     }
 
+    _formatClosingDetails() {
+        const cashExpected = this.cashExpected;
+        const cashCounted = this.cashCounted;
+        const diff = this.props.sessionData?.cashData?.difference || 0;
+        const diffFormatted = this.diffText;
+        const diffDesc = diff === 0 ? "Sin diferencias ($0.00)" : (diff > 0 ? `SOBRANTE: +${diffFormatted}` : `⚠️ FALTANTE: ${diffFormatted}`);
+        const totalOrders = this.props.sessionData?.salesData?.totalOrders || 0;
+        const totalSales = this.env.utils.formatCurrency(this.props.sessionData?.salesData?.totalAmount || 0);
+        const notes = this.props.sessionData?.closingNotes ? ` | Notas: ${this.props.sessionData.closingNotes}` : "";
+
+        return _t("Cierre de Caja - Esperado: %s | Contado: %s | %s | Ventas: %s (%s pedidos)%s",
+            cashExpected, cashCounted, diffDesc, totalSales, totalOrders, notes);
+    }
+
     async requestRemoteOtp() {
         try {
             const pos = this.env.services.pos;
+            const details = this._formatClosingDetails();
+
             const otpRes = await this.env.services.orm.call("pos.approval.otp", "action_request_otp", [{
                 config_id: pos.config.id,
                 session_id: pos.config.current_session_id?.id,
                 cashier_id: pos.accessRight.cashier?.id,
                 action_type: 'session_close',
-                details: _t("Cierre de Sesión / Corte de Caja"),
+                details: details,
                 receipt_number: '',
                 order_number: '',
             }]);
@@ -83,7 +148,7 @@ export class ManagerSelectPopup extends Component {
             if (otpRes && otpRes.success) {
                 await this.env.services.dialog.add(AlertDialog, {
                     title: _t("Código Temporal Enviado"),
-                    body: _t("Se ha enviado un código de autorización al correo: %s.\nVigencia: %s minutos. Solicite el código al gerente e ingréselo en el campo de PIN.", otpRes.email, otpRes.validity_minutes),
+                    body: _t("Se ha enviado un código de autorización con el resumen del corte al correo: %s.\nVigencia: %s minutos. Solicite el código al gerente e ingréselo a continuación.", otpRes.email, otpRes.validity_minutes),
                 });
             } else {
                 await this.showError("Error al Solicitar Código", otpRes?.message || _t("No fue posible generar el código temporal."));
@@ -94,40 +159,45 @@ export class ManagerSelectPopup extends Component {
     }
 
     async confirm() {
-        const selectedManager = this.props.managers.find(u => u.id === parseInt(this.state.selectedManagerId, 10));
-
         if (!this.state.pin) {
             await this.showError("PIN Requerido", "Por favor ingrese el PIN o Código Temporal.");
             return;
         }
 
-        // 1. Validar PIN físico si coincide con el manager seleccionado
-        if (selectedManager && selectedManager._pin && selectedManager._pin === Sha1.hash(this.state.pin)) {
+        const hashedPin = Sha1.hash(this.state.pin);
+
+        // 1. Reconocimiento automático de gerente presencial (sin selector desplegable)
+        const matchedManager = this.props.managers.find(
+            m => m._pin && m._pin === hashedPin
+        );
+
+        if (matchedManager) {
             this.props.onConfirm({ 
                 confirmed: true,
-                manager: selectedManager,
+                manager: matchedManager,
                 enteredPin: this.state.pin,
                 is_otp: false
             });
             return;
         }
 
-        // 2. Si no es el PIN físico, validar si es un código OTP temporal en backend
+        // 2. Si no es el PIN físico de ningún gerente local, validar si es código OTP temporal en backend
         try {
             const pos = this.env.services.pos;
+            const details = this._formatClosingDetails();
             const validation = await this.env.services.orm.call("pos.approval.otp", "validate_approval", [
                 pos.config.id,
                 pos.config.current_session_id?.id,
                 this.state.pin,
                 'session_close',
-                _t("Cierre de Sesión POS"),
+                details,
                 pos.accessRight.cashier?.id,
             ]);
 
             if (validation && validation.approved) {
                 this.props.onConfirm({
                     confirmed: true,
-                    manager: selectedManager || { id: validation.manager_id, name: validation.manager_name },
+                    manager: { id: validation.manager_id, name: validation.manager_name },
                     enteredPin: this.state.pin,
                     is_otp: true
                 });
@@ -137,7 +207,7 @@ export class ManagerSelectPopup extends Component {
             console.error("[ManagerSelectPopup] Error validando OTP:", err);
         }
 
-        await this.showError("PIN o Código Incorrecto", "El PIN o Código Temporal ingresado no es válido o ya expiró.");
+        await this.showError("PIN o Código Incorrecto", "El PIN o Código Temporal ingresado no coincide con ningún gerente autorizado ni es válido.");
     }
 
     cancel() {
@@ -158,6 +228,7 @@ export class ManagerSelectDialog extends Component {
             <ManagerSelectPopup
                 title="this.props.title"
                 managers="this.props.managers"
+                sessionData="this.props.sessionData"
                 onConfirm="this.props.onClose" 
             />
         </Dialog>`;
@@ -166,207 +237,13 @@ export class ManagerSelectDialog extends Component {
     props = useProps({
         title: t.string(),
         managers: t.array(),
+        sessionData: t.object().optional({}),
         onClose: t.function(),
         close: t.function().optional(),
     });
 }
 
-// Template genérico que aparece después de hacer clic en "Close Register"
-export class SessionCloseTemplatePopup extends Component {
-    static template = xml`
-        <div class="popup close-session-template">
-            <div class="header">
-                <h4><t t-esc="this.props.title"/></h4>
-            </div>
-            <div class="body">
-                <div class="alert alert-info mb-3">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="fa fa-user"></i> Session Information</h6>
-                            <p><strong>Manager:</strong> <t t-esc="this.props.managerName"/></p>
-                            <p><strong>Sesión ID:</strong> <t t-esc="this.props.sessionId"/></p>
-                            <p><strong>Cajero:</strong> <t t-esc="this.props.cashierName"/></p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="fa fa-clock-o"></i> Timing</h6>
-                            <p><strong>Inicio de sesión:</strong> <t t-esc="this.props.sessionStart"/></p>
-                            <p><strong>Hora de cierre:</strong> <t t-esc="this.props.currentDate"/></p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0"><i class="fa fa-money"></i> Resumen de dinero</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="text-muted">Esperado:</label>
-                                        <div class="h5 text-success">
-                                            <t t-esc="this.env.utils.formatCurrency(this.props.cashData.expected || 0)"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="text-muted">Contado:</label>
-                                        <div class="h5" t-att-class="this.props.cashData.difference !== 0 ? 'text-warning' : 'text-success'">
-                                            <t t-esc="this.env.utils.formatCurrency(this.props.cashData.counted || 0)"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-2"/>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label class="text-muted">Diferencia:</label>
-                                        <div class="h5" t-att-class="this.props.cashData.difference !== 0 ? 'text-danger' : 'text-success'">
-                                            <t t-esc="this.env.utils.formatCurrency(this.props.cashData.difference || 0)"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0"><i class="fa fa-shopping-cart"></i> Resumen de Ventas</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="text-muted">Total de Ordenes:</label>
-                                        <div class="h5 text-primary">
-                                            <t t-esc="this.props.salesData.totalOrders || 0"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="text-muted">Cantidad Ttotal:</label>
-                                        <div class="h5 text-primary">
-                                            <t t-esc="this.env.utils.formatCurrency(this.props.salesData.totalAmount || 0)"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Notas de cierre si existen -->
-                <div t-if="this.props.closingNotes" class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fa fa-comment"></i> Closing Notes</h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-0" t-esc="this.props.closingNotes"/>
-                    </div>
-                </div>
-                
-                <!-- Sección expandible para futuras funcionalidades 
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fa fa-info-circle"></i> Additional Information</h6>
-                    </div>
-                    <div class="card-body text-muted">
-                        <p class="mb-0">This section can be expanded with additional closing procedures, reports, or validations.</p>
-                    </div>
-                </div>-->
-            </div>
-            <div class="footer mt-3">
-                <div class="d-flex justify-content-between">
-                   
-                    <div class="btn-group">
-                        <button t-on-click="this.proceedWithClose" class="btn btn-success">
-                            <i class="fa fa-check"></i> Confirmar Cierre de sesión
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-
-    props = useProps({
-        title: t.string().optional(""),
-        managerName: t.string(),
-        cashierName: t.string(),
-        sessionId: t.or([t.string(), t.number()]),
-        sessionStart: t.string(),
-        currentDate: t.string(),
-        cashData: t.object(),
-        salesData: t.object(),
-        closingNotes: t.string().optional(""),
-        onConfirm: t.function(),
-    });
-
-    setup() {
-        console.log("[SessionCloseTemplatePopup] Setup iniciado");
-        console.log("[SessionCloseTemplatePopup] Props recibidas:", this.props);
-    }
-
-    proceedWithClose() {
-        console.log("[SessionCloseTemplatePopup] Confirmando cierre de sesión definitivo");
-        this.props.onConfirm({ confirmed: true, action: 'proceed' });
-    }
-
-    cancel() {
-        console.log("[SessionCloseTemplatePopup] Cancelando cierre de sesión");
-        this.props.onConfirm({ confirmed: false, action: 'cancel' });
-    }
-}
-
-// MODIFICACIÓN PRINCIPAL: Dialog personalizado sin botón OK automático
-export class SessionCloseTemplateDialog extends Component {
-    static template = xml`
-        <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" t-esc="this.props.title"/>
-                    </div>
-                    <div class="modal-body p-0">
-                        <SessionCloseTemplatePopup
-                            title="this.props.title"
-                            managerName="this.props.managerName"
-                            cashierName="this.props.cashierName"
-                            sessionId="this.props.sessionId"
-                            sessionStart="this.props.sessionStart"
-                            currentDate="this.props.currentDate"
-                            cashData="this.props.cashData"
-                            salesData="this.props.salesData"
-                            closingNotes="this.props.closingNotes"
-                            onConfirm="this.handleConfirm.bind(this)" 
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>`;
-    
-    static components = { SessionCloseTemplatePopup };
-    props = useProps({
-        title: t.string(),
-        managerName: t.string(),
-        cashierName: t.string(),
-        sessionId: t.or([t.string(), t.number()]),
-        sessionStart: t.string(),
-        currentDate: t.string(),
-        cashData: t.object(),
-        salesData: t.object(),
-        closingNotes: t.string().optional(""),
-        onClose: t.function(),
-        close: t.function().optional(),
-    });
-
-    handleConfirm(result) {
-        console.log("[SessionCloseTemplateDialog] handleConfirm llamado con:", result);
-        if (this.props.close) {
-            this.props.close();
-        }
-        this.props.onClose(result);
-    }
-}
-
-// Patch del ClosePosPopup para interceptar el clic en "Close Register"
+// Patch del ClosePosPopup para interceptar el botón "Close Register"
 patch(ClosePosPopup.prototype, {
     async confirm() {
         console.log("[ClosePosPopup] Interceptando confirm() - botón Close Register presionado");
@@ -376,34 +253,29 @@ patch(ClosePosPopup.prototype, {
             return super.confirm(...arguments);
         }
 
-        // Obtener datos de la sesión actual antes de continuar
+        // Obtener datos de la sesión actual (arqueo, ventas, notas)
         const sessionData = this.getSessionDataForTemplate();
         
-        // Mostrar el diálogo de validación de manager PRIMERO
-        const managerValidationResult = await this.showManagerValidation();
+        // Mostrar el diálogo de validación de gerente con los datos de arqueo
+        const managerValidationResult = await this.showManagerValidation(sessionData);
 
         if (managerValidationResult?.confirmed) {
-            console.log("[ClosePosPopup] Manager validado, saltando template y procediendo directo al cierre");
+            console.log("[ClosePosPopup] Gerente validado, procediendo al cierre");
 
-            // Registrar la aprobación del manager en el backend si pos_hr está activo
+            // Registrar aprobación en backend si no fue por OTP (el OTP ya se registra solo)
             const approvalRegistered = await this.registerManagerApproval(managerValidationResult);
             if (!approvalRegistered) {
                 return;
             }
 
-            // Ejecutar cierre directamente
             return this.closeSession();
-
         } else {
-            console.log("[ClosePosPopup] Validación de manager fallida o cancelada");
+            console.log("[ClosePosPopup] Validación de gerente cancelada");
             return;
         }
     },
 
     getSessionDataForTemplate() {
-        console.log("[ClosePosPopup] Recopilando datos de sesión para template");
-        
-        // Obtener datos de efectivo
         const cashData = {
             expected: this.props.default_cash_details?.amount || 0,
             counted: parseFloat(this.state.payments[this.props.default_cash_details?.id]?.counted || 0),
@@ -411,16 +283,12 @@ patch(ClosePosPopup.prototype, {
         };
         cashData.difference = cashData.counted - cashData.expected;
         
-        // Obtener datos de ventas
         const salesData = {
             totalOrders: this.props.orders_details?.quantity || 0,
             totalAmount: this.props.orders_details?.amount || 0
         };
         
-        // Obtener notas de cierre
         const closingNotes = this.state.notes || '';
-        
-        // Obtener información de sesión
         const sessionStart = this.pos.config.current_session_id?.start_at || 'Unknown';
         
         return {
@@ -431,39 +299,31 @@ patch(ClosePosPopup.prototype, {
         };
     },
 
-    async showManagerValidation() {
-        console.log("[ClosePosPopup] Iniciando validación de manager");
-
+    async showManagerValidation(sessionData) {
         if (!this.pos.config.module_pos_hr || !this.pos.config.enable_restriction_on_session_close) {
             return { confirmed: true };
         }
 
         const employeeModel = this.pos.models["hr.employee"];
         if (!employeeModel) {
-            console.log("[ClosePosPopup] hr.employee model no disponible o pos_hr no activo, saltando validación");
             return { confirmed: true };
         }
 
-        // Obtener lista de managers
-        const configId = this.pos.config.id;
+        // Obtener lista de managers autorizados en este POS
         const managers = this.pos.models["hr.employee"].getAll().filter(
             (employee) => employee._role === "manager"
         );
-        
-        console.log("[ClosePosPopup] Managers disponibles:", managers);
 
         if (!managers.length) {
-            console.log("[ClosePosPopup] No hay managers configurados, saltando validación");
             return { confirmed: true };
         }
 
-        // Mostrar diálogo de selección de manager
         return new Promise((resolve) => {
             const dialogProps = {
-                title: _t("Manager Approval Required for Session Close"),
+                title: _t("Autorización de Cierre de Caja"),
                 managers: managers,
+                sessionData: sessionData,
                 onClose: (result) => {
-                    console.log("[ClosePosPopup] Resultado de validación de manager:", result);
                     resolve(result);
                 }
             };
@@ -472,49 +332,22 @@ patch(ClosePosPopup.prototype, {
         });
     },
 
-    async showSessionCloseTemplate(manager, sessionData) {
-        console.log("[ClosePosPopup] Mostrando template de resumen de cierre");
-        
-        return new Promise((resolve) => {
-            const currentDate = new Date().toLocaleString();
-            const sessionId = this.pos.config.current_session_id?.id || 'Unknown';
-            const cashierName = this.pos.accessRight.cashier?.name || 'Unknown';
-            
-            const dialogProps = {
-                title: _t("Session Close Confirmation"),
-                managerName: manager.name,
-                cashierName: cashierName,
-                sessionId: sessionId,
-                sessionStart: new Date(sessionData.sessionStart).toLocaleString(),
-                currentDate: currentDate,
-                cashData: sessionData.cashData,
-                salesData: sessionData.salesData,
-                closingNotes: sessionData.closingNotes,
-                onClose: (result) => {
-                    console.log("[ClosePosPopup] Resultado de template de cierre:", result);
-                    resolve(result);
-                }
-            };
-            
-            this.dialog.add(SessionCloseTemplateDialog, dialogProps);
-        });
-    },
-
     async registerManagerApproval(managerValidationResult) {
         if (this.pos.config.module_pos_hr) {
-            console.log("[ClosePosPopup] Registrando aprobación de manager en backend");
             const cashier = this.pos.accessRight.cashier;
             if (!cashier?.id) {
                 this.dialog.add(AlertDialog, {
-                    title: _t("Cashier unavailable"),
-                    body: _t("The cashier could not be identified, so the approval was not recorded."),
+                    title: _t("Cajero no disponible"),
+                    body: _t("No se pudo identificar al cajero para registrar la aprobación."),
                 });
                 return false;
             }
+
+            // Si fue validado por OTP remoto, el backend ya lo registró en manager.approval
             if (managerValidationResult.is_otp) {
-                console.log("[ClosePosPopup] Aprobación ya registrada por validación OTP en backend");
                 return true;
             }
+
             try {
                 await this.env.services.orm.call(
                     "manager.approval",
@@ -527,13 +360,12 @@ patch(ClosePosPopup.prototype, {
                         is_otp: false
                     }]
                 );
-                console.log("[ClosePosPopup] Aprobación registrada exitosamente");
                 return true;
             } catch (error) {
-                console.error("[ClosePosPopup] Error al registrar aprobación:", error);
+                console.error("[ClosePosPopup] Error registrando aprobación:", error);
                 this.dialog.add(AlertDialog, {
-                    title: _t("Approval could not be recorded"),
-                    body: _t("The session remains open because the manager approval could not be recorded."),
+                    title: _t("Error al registrar aprobación"),
+                    body: _t("La sesión no se pudo cerrar porque falló el registro de aprobación."),
                 });
                 return false;
             }
