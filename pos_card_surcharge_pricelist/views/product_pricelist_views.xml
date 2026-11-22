@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view extension -->
+    <record id="product_pricelist_view_inherit_card_surcharge" model="ir.ui.view">
+        <field name="name">product.pricelist.form.inherit.card_surcharge</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="is_special_td" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Tree / List view extension -->
+    <record id="product_pricelist_view_tree_inherit_card_surcharge" model="ir.ui.view">
+        <field name="name">product.pricelist.tree.inherit.card_surcharge</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="is_special_td" widget="boolean_toggle" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search view extension -->
+    <record id="product_pricelist_view_search_inherit_card_surcharge" model="ir.ui.view">
+        <field name="name">product.pricelist.search.inherit.card_surcharge</field>
+        <field name="model">product.pricelist</field>
+        <field name="inherit_id" ref="product.product_pricelist_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='inactive']" position="before">
+                <filter string="Lista Especial TD / Tarjeta" name="filter_special_td" domain="[('is_special_td', '=', True)]"/>
+                <separator/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

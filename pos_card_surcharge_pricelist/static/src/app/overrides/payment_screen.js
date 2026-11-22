@@ -14,7 +14,11 @@ patch(PaymentScreen.prototype, {
                     currentOrder.base_cash_pricelist_id = currentOrder.pricelist_id;
                 }
 
-                const cardPricelist = findCardPricelist(this.pos, currentOrder.base_cash_pricelist_id || currentOrder.pricelist_id);
+                const cardPricelist = findCardPricelist(
+                    this.pos,
+                    currentOrder.base_cash_pricelist_id || currentOrder.pricelist_id,
+                    paymentMethod
+                );
                 if (cardPricelist && currentOrder.pricelist_id?.id !== cardPricelist.id) {
                     currentOrder.setPricelist(cardPricelist);
                     this.notification.add(

@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='journal_id']" position="before">
                 <field name="apply_card_surcharge"/>
+                <field name="card_pricelist_id" invisible="not apply_card_surcharge" options="{'no_create': True}"/>
             </xpath>
         </field>
     </record>
@@ -18,6 +19,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="apply_card_surcharge" widget="boolean_toggle"/>
+                <field name="card_pricelist_id" optional="show"/>
             </xpath>
         </field>
     </record>

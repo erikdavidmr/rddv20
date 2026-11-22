@@ -7,7 +7,7 @@ patch(Navbar.prototype, {
     get isCardPricelistActive() {
         const order = this.pos.getOrder();
         const pl = order?.pricelist_id;
-        return pl ? (pl.name || "").includes("2.0") : false;
+        return pl ? Boolean(pl.is_special_td || (pl.name || "").includes("2.0")) : false;
     },
 
     get showCardSurchargeToggle() {

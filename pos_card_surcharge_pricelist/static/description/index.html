@@ -144,19 +144,27 @@
 
         <div style="display: flex; flex-direction: column; gap: 15px;">
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
-                <strong style="color: #1e3a8a;">1. Métodos de Pago que Disparan el Recargo:</strong>
+                <strong style="color: #1e3a8a;">1. Marcar Listas como "Lista Especial TD / Tarjeta":</strong>
                 <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
-                    En <strong>Punto de Venta $\rightarrow$ Configuración $\rightarrow$ Métodos de Pago</strong>, abre los métodos correspondientes (ej. Tarjeta de Crédito, Tarjeta de Débito, Terminal) y marca la casilla <em>"Aplica Tarifa Tarjeta (+2%)"</em>.
-                    <br><em>(Nota: El módulo también detecta de forma automática los métodos cuyo nombre contenga "Tarjeta", "TPV" o "Terminal").</em>
+                    En <strong>Ventas / Punto de Venta $\rightarrow$ Productos $\rightarrow$ Listas de Precios</strong>:
+                    <br>• Abre la lista de precios que contiene el 2% extra (ej. <code>L1 2.0</code>, <code>L2 2.0</code>, etc.).
+                    <br>• Activa el interruptor <strong>"Lista Especial TD / Tarjeta"</strong>.
+                    <br>• En la vista de lista/árbol y en la barra de búsqueda puedes filtrar rápidamente usando el nuevo filtro <strong>"Lista Especial TD / Tarjeta"</strong>.
                 </p>
             </div>
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
-                <strong style="color: #1e3a8a;">2. Ajustes de la Caja (TPV):</strong>
+                <strong style="color: #1e3a8a;">2. Métodos de Pago con Tarifa Específica Opcional:</strong>
                 <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
-                    En <strong>Punto de Venta $\rightarrow$ Configuración $\rightarrow$ Punto de Venta</strong>, en la sección de Ajustes encontrarás:
-                    <br>• <strong>Conmutación Automática Tarifa Tarjeta (+2%):</strong> Casilla para activar o desactivar la funcionalidad por caja.
-                    <br>• <strong>Sufijo de Lista Tarjeta:</strong> Por defecto <code>2.0</code> (para conmutar ej. <code>L1</code> a <code>L1 2.0</code>).
-                    <br>• <strong>Lista de Tarjeta por Defecto (Fallback):</strong> Lista comodín que se aplicará en caso de que una tarifa personalizada no cuente con versión 2.0.
+                    En <strong>Punto de Venta $\rightarrow$ Configuración $\rightarrow$ Métodos de Pago</strong>, abre los métodos correspondientes (ej. Tarjeta de Crédito, TPV MIFEL):
+                    <br>• <strong>Aplica Tarifa Tarjeta (+2%):</strong> Activa el conmutador.
+                    <br>• <strong>Tarifa Tarjeta Específica:</strong> (Opcional) Si deseas que este método de pago fuerce una lista de precios en particular, selecciónala aquí (el selector filtra únicamente las listas marcadas como <em>Especial TD</em> pertenecientes a la misma compañía o globales).
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">3. Configuración por Compañía y por Caja (TPV):</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    • <strong>Por Compañía:</strong> En <em>Ajustes $\rightarrow$ Compañías $\rightarrow$ [Compañía]</em>, puedes definir la <strong>"Tarifa Tarjeta TD por Defecto"</strong> para toda la empresa.
+                    <br>• <strong>Por Caja (TPV):</strong> En <em>Punto de Venta $\rightarrow$ Configuración $\rightarrow$ Punto de Venta</em>, puedes activar o desactivar la conmutación y definir la <strong>"Lista Tarjeta / Especial TD"</strong> específica para esa caja, heredando automáticamente la de la compañía si no se especifica una particular.
                 </p>
             </div>
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">

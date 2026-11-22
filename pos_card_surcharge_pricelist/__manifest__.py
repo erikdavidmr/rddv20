@@ -16,6 +16,8 @@
     'license': 'OPL-1',
     'depends': ['point_of_sale', 'product'],
     'data': [
+        'views/product_pricelist_views.xml',
+        'views/res_company_views.xml',
         'views/pos_payment_method_views.xml',
         'views/pos_config_views.xml',
     ],

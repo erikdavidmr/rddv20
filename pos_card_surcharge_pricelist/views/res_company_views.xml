@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_inherit_card_surcharge" model="ir.ui.view">
+        <field name="name">res.company.form.inherit.card_surcharge</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general_info']" position="inside">
+                <group string="Tarifas Especiales TD / Tarjeta (TPV)" name="card_surcharge_group">
+                    <field name="card_pricelist_id" options="{'no_create': True}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
