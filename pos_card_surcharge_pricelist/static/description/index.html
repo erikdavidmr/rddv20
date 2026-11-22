@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Recargo Automático con Tarjeta (+2%) en POS - Odoo 20</title>
+</head>
+<body style="font-family: 'Montserrat', 'Open Sans', Helvetica, Arial, sans-serif; color: #2d3748; background-color: #f8fafc; margin: 0; padding: 0;">
+
+<div class="container" style="max-width: 1100px; margin: 30px auto; padding: 20px;">
+
+    <!-- HEADER / HERO BANNER -->
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%); border-radius: 16px; padding: 45px 35px; color: #ffffff; box-shadow: 0 10px 25px rgba(30, 58, 138, 0.25); text-align: center; margin-bottom: 35px;">
+        <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.2); padding: 6px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+            Odoo 20.0 Enterprise & Community
+        </div>
+        <h1 style="font-size: 34px; font-weight: 800; margin: 0 0 15px 0; letter-spacing: -0.5px;">
+            POS Card Surcharge Pricelist (+2%)
+        </h1>
+        <h2 style="font-size: 20px; font-weight: 400; margin: 0 auto; max-width: 820px; opacity: 0.95; line-height: 1.5;">
+            Conmutación automática a listas de precios de tarjeta (+2%) al pagar en terminal bancaria, botón toggle en mostrador y cálculo fiscal exacto de IVA e IEPS por producto.
+        </h2>
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">💳 Conmutación 100% Automática</span>
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">⚖️ Conforme a PROFECO y SAT</span>
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">🔄 Mapeo a Tarifas 2.0</span>
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">💵 Reversión al Pagar en Efectivo</span>
+        </div>
+    </div>
+
+    <!-- EL PROBLEMA VS LA SOLUCIÓN -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            🎯 ¿Por qué es fundamental este método para tu negocio?
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div style="background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 18px; border-radius: 8px;">
+                <h4 style="color: #c53030; margin: 0 0 10px 0; font-size: 16px; font-weight: 700;">❌ El riesgo de cobrar comisión en un renglón:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #4a5568; font-size: 14px; line-height: 1.6;">
+                    <li><strong>Sanciones de PROFECO:</strong> La ley prohíbe explícitamente transferir comisiones bancarias como cargo al consumidor al pagar con tarjeta.</li>
+                    <li><strong>Distorsión de Impuestos (SAT):</strong> Si metes una línea genérica de "comisión", esa línea grava IVA 16%, pero tus productos pueden ser alimentos con tasa 0% o confitería con IEPS del 8%. La factura global queda descuadrada fiscalmente.</li>
+                    <li><strong>Error humano:</strong> El cajero a menudo olvida agregar la comisión o calcula mal el porcentaje a mano.</li>
+                </ul>
+            </div>
+            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 18px; border-radius: 8px;">
+                <h4 style="color: #15803d; margin: 0 0 10px 0; font-size: 16px; font-weight: 700;">✅ La solución profesional mediante Tarifas:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #4a5568; font-size: 14px; line-height: 1.6;">
+                    <li><strong>100% Legal y transparente:</strong> Se maneja como "Precio con Tarjeta" vs "Precio en Efectivo", modalidad autorizada y ampliamente usada en el comercio formal.</li>
+                    <li><strong>Impuestos Matemáticamente Exactos:</strong> Cada producto sube su 2% en su precio unitario, preservando sus bases y tasas de IVA e IEPS sin distorsión para el timbrado del CFDI.</li>
+                    <li><strong>Automatización Total:</strong> Al pulsar el método de pago Tarjeta, el POS hace el cambio solo; el cajero no tiene que calcular ni recordar nada.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALCANCES Y CAPACIDADES -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            📌 Alcances y Características Clave
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">⚡</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Conmutación al Cobrar</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Al presionar "Tarjeta" o terminal en la pantalla de cobro, el ticket se recalcula con la lista 2.0 al instante.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">💵</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Reversión a Efectivo</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Si el cliente cambia de opinión y decide pagar en efectivo, la tarifa base original se restablece de inmediato.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🔘</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Botón Toggle en Mostrador</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Permite al cajero cambiar entre Efectivo y Tarjeta con 1 clic en la barra superior para cotizar con anticipación.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🔄</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Mapeo Inteligente 2.0</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Detecta automáticamente si la tarifa activa tiene versión espejo (L1 $\rightarrow$ L1 2.0, L2 $\rightarrow$ L2 2.0, Mayoreo, etc.).</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🧾</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Monto Exacto a Terminal</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">La terminal Verifone o el monto por cobrar recibe el total real con el +2% integrado sin pasos extra.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">📊</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">1 Regla = Miles de Productos</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Compatible con fórmulas Odoo: 1 sola regla global del -2% descuenta hacia arriba y actualiza todo el catálogo.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANUAL DE USO PASO A PASO -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            📖 Manual de Uso en Caja
+        </h3>
+
+        <!-- Modo 1 -->
+        <div style="margin-bottom: 25px;">
+            <h4 style="color: #1e3a8a; font-size: 17px; margin-top: 0;">Flujo 1: Cobro Automático en Pantalla de Pago (Recomendado)</h4>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="background: #2563eb; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">1</div>
+                    <div style="font-size: 14px; color: #334155; line-height: 1.5;">El cajero registra los productos de forma habitual con su tarifa regular de efectivo (ej. <code>L1</code>).</div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="background: #2563eb; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">2</div>
+                    <div style="font-size: 14px; color: #334155; line-height: 1.5;">Presiona <strong>Pagar</strong> para ingresar a la pantalla de cobro.</div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="background: #2563eb; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">3</div>
+                    <div style="font-size: 14px; color: #334155; line-height: 1.5;">Al presionar el método <strong>Tarjeta de Débito, Tarjeta de Crédito o Terminal</strong>:
+                        <br>• El sistema conmuta el pedido a <code>L1 2.0</code>.
+                        <br>• El total a cobrar se recalcula automáticamente con el +2% y se manda a la terminal.
+                        <br>• Aparece un mensaje informativo en pantalla: <em>"Tarifa con tarjeta (+2%) aplicada: L1 2.0"</em>.
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="background: #2563eb; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">4</div>
+                    <div style="font-size: 14px; color: #334155; line-height: 1.5;">Si la tarjeta es rechazada o el cliente prefiere pagar en efectivo: el cajero elimina el renglón de pago con tarjeta y el sistema <strong>restablece la tarifa de efectivo original inmediatamente</strong>.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modo 2 -->
+        <div style="border-top: 1px solid #e2e8f0; pt-3; margin-top: 20px; padding-top: 20px;">
+            <h4 style="color: #1e3a8a; font-size: 17px; margin-top: 0;">Flujo 2: Conmutación Manual Anticipada (Botón en Barra Superior)</h4>
+            <div style="font-size: 14px; color: #334155; line-height: 1.5;">
+                Si el cliente pregunta desde que llega al mostrador: <em>"¿Cuánto me costaría todo si pago con tarjeta?"</em>:
+                <br>• El cajero simplemente hace clic en el botón <strong>[ 💵 Efectivo ]</strong> en la barra superior.
+                <br>• El botón cambia a color amarillo/dorado <strong>[ 💳 Tarjeta (+2%) ]</strong> y todos los precios en la orden se ajustan en tiempo real.
+                <br>• Al volver a hacer clic, regresa de inmediato a <strong>[ 💵 Efectivo ]</strong>.
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIGURACIÓN -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            ⚙️ Configuración en Odoo
+        </h3>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">1. Métodos de Pago que Disparan el Recargo:</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    En <strong>Punto de Venta $\rightarrow$ Configuración $\rightarrow$ Métodos de Pago</strong>, abre los métodos correspondientes (ej. Tarjeta de Crédito, Tarjeta de Débito, Terminal) y marca la casilla <em>"Aplica Tarifa Tarjeta (+2%)"</em>.
+                    <br><em>(Nota: El módulo también detecta de forma automática los métodos cuyo nombre contenga "Tarjeta", "TPV" o "Terminal").</em>
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">2. Ajustes de la Caja (TPV):</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    En <strong>Punto de Venta $\rightarrow$ Configuración $\rightarrow$ Punto de Venta</strong>, en la sección de Ajustes encontrarás:
+                    <br>• <strong>Conmutación Automática Tarifa Tarjeta (+2%):</strong> Casilla para activar o desactivar la funcionalidad por caja.
+                    <br>• <strong>Sufijo de Lista Tarjeta:</strong> Por defecto <code>2.0</code> (para conmutar ej. <code>L1</code> a <code>L1 2.0</code>).
+                    <br>• <strong>Lista de Tarjeta por Defecto (Fallback):</strong> Lista comodín que se aplicará en caso de que una tarifa personalizada no cuente con versión 2.0.
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">3. Cómo Crear una Lista Dinámica con +2% en 1 Minuto:</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    En <strong>Ventas $\rightarrow$ Productos $\rightarrow$ Listas de Precios</strong>:
+                    <br>1. Crea una nueva lista (ej. <em>L1 Tarjeta</em>).
+                    <br>2. Agrega <strong>una sola regla</strong>:
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;• Aplicar en: <code>Todos los productos</code>.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;• Cálculo: <code>Fórmula / Descuento</code>.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;• Basado en: <code>Otra lista de precios</code> (selecciona tu lista base <code>L1</code>).
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;• Descuento: <code>-2.0 %</code> (el valor negativo suma el 2% exacto).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PERMISOS Y SEGURIDAD -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            🔒 Permisos y Seguridad
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead>
+                <tr style="background: #edf2f7; text-align: left;">
+                    <th style="padding: 12px; border-radius: 6px 0 0 0; color: #2d3748;">Rol / Perfil</th>
+                    <th style="padding: 12px; color: #2d3748;">Operación en TPV</th>
+                    <th style="padding: 12px; border-radius: 0 6px 0 0; color: #2d3748;">Control de Seguridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: 700; color: #1e40af;">Cajero (Usuario TPV)</td>
+                    <td style="padding: 12px; color: #15803d; font-weight: 600;">✅ Totalmente transparente</td>
+                    <td style="padding: 12px; color: #4b5563;">El cajero cobra normalmente; el sistema calcula los recargos sin que pueda alterar precios arbitrariamente.</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: 700; color: #1e40af;">Administrador / Gerente</td>
+                    <td style="padding: 12px; color: #15803d; font-weight: 600;">⚙️ Configuración y auditoría</td>
+                    <td style="padding: 12px; color: #4b5563;">Configura métodos de pago autorizados, sufijos de tarifas y supervisa que los reportes de corte cuadren al 100%.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SOPORTE Y CONTACTO -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin: 0 0 10px 0;">¿Dudas o requerimientos especiales?</h3>
+        <p style="font-size: 14px; color: #64748b; margin: 0 0 15px 0;">Módulo desarrollado con estándares nativos de Odoo 20 y cumplimiento de normatividad comercial y fiscal.</p>
+        <div style="display: inline-block; background: #eff6ff; padding: 10px 24px; border-radius: 30px; border: 1px solid #bfdbfe;">
+            <a href="mailto:david.2964.erls@gmail.com" style="color: #2563eb; text-decoration: none; font-weight: 700; font-size: 15px;">
+                ✉️ david.2964.erls@gmail.com
+            </a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

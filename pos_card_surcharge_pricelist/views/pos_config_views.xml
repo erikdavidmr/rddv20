@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_config_view_form_inherit_card_surcharge" model="ir.ui.view">
+        <field name="name">pos.config.form.inherit.card_surcharge</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='configuration']//div[hasclass('o_settings_container')]" position="inside">
+                <setting id="card_surcharge_setting"
+                         string="Recargo Automático por Tarjeta (+2%)"
+                         help="Conmuta automáticamente a la lista de precios 2.0 al seleccionar un método de pago con tarjeta en TPV.">
+                    <field name="enable_card_surcharge"/>
+                    <div class="content-group mt16" invisible="not enable_card_surcharge">
+                        <div class="row mt-2">
+                            <label for="card_pricelist_suffix" class="col-lg-4 o_light_label"/>
+                            <field name="card_pricelist_suffix" class="col-lg-8"/>
+                        </div>
+                        <div class="row mt-2">
+                            <label for="default_card_pricelist_id" class="col-lg-4 o_light_label"/>
+                            <field name="default_card_pricelist_id" class="col-lg-8" options="{'no_create': True}"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
