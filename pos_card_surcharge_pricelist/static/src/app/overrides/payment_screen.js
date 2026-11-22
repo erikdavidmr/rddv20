@@ -7,10 +7,10 @@ patch(PaymentScreen.prototype, {
     async addNewPaymentLine(paymentMethod, args = {}) {
         const isCard = isCardPaymentMethod(paymentMethod);
 
-        if (this.pos.config.enable_card_surcharge && isCard) {
+        if (this.pos?.config?.enable_card_surcharge && isCard) {
             const currentOrder = this.currentOrder;
             if (currentOrder) {
-                const basePl = currentOrder.base_cash_pricelist_id || currentOrder.pricelist_id || this.pos.config.pricelist_id;
+                const basePl = currentOrder.base_cash_pricelist_id || currentOrder.pricelist_id || this.pos?.config?.pricelist_id;
                 if (!currentOrder.base_cash_pricelist_id && basePl) {
                     currentOrder.base_cash_pricelist_id = basePl;
                 }
@@ -22,10 +22,13 @@ patch(PaymentScreen.prototype, {
                 );
                 if (cardPricelist && currentOrder.pricelist_id?.id !== cardPricelist.id) {
                     currentOrder.setPricelist(cardPricelist);
-                    this.notification.add(
-                        _t("Tarifa con tarjeta (+2%) aplicada: %s", cardPricelist.name),
-                        { type: "info" }
-                    );
+                    const notification = this.notification || this.pos?.notification;
+                    if (notification?.add) {
+                        notification.add(
+                            _t("Tarifa con tarjeta (+2%) aplicada: %s", cardPricelist.name),
+                            { type: "info" }
+                        );
+                    }
                 }
             }
         }
@@ -36,18 +39,21 @@ patch(PaymentScreen.prototype, {
     deletePaymentLine(uuid) {
         super.deletePaymentLine(...arguments);
 
-        if (this.pos.config.enable_card_surcharge && this.currentOrder?.base_cash_pricelist_id) {
-            const hasCardPayment = this.paymentLines.some((line) => {
+        if (this.pos?.config?.enable_card_surcharge && this.currentOrder?.base_cash_pricelist_id) {
+            const hasCardPayment = this.paymentLines?.some?.((line) => {
                 return isCardPaymentMethod(line.payment_method_id);
             });
 
             if (!hasCardPayment && this.currentOrder.pricelist_id?.id !== this.currentOrder.base_cash_pricelist_id.id) {
                 const cashPricelist = this.currentOrder.base_cash_pricelist_id;
                 this.currentOrder.setPricelist(cashPricelist);
-                this.notification.add(
-                    _t("Tarifa de efectivo restaurada: %s", cashPricelist.name),
-                    { type: "info" }
-                );
+                const notification = this.notification || this.pos?.notification;
+                if (notification?.add) {
+                    notification.add(
+                        _t("Tarifa de efectivo restaurada: %s", cashPricelist.name),
+                        { type: "info" }
+                    );
+                }
             }
         }
     },
