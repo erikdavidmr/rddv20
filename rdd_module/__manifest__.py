@@ -24,6 +24,7 @@
         'views/pricelist.xml',
         'views/pos_config.xml',
         'views/product.xml',
+        'views/pricelist_issue_views.xml',
     ],
     
     'assets': {

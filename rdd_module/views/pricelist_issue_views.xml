@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Search View -->
+        <record id="rdd_pricelist_issue_view_search" model="ir.ui.view">
+            <field name="name">rdd.pricelist.issue.search</field>
+            <field name="model">rdd.pricelist.issue</field>
+            <field name="arch" type="xml">
+                <search string="Buscar Incidencias">
+                    <field name="name" string="Incidencia / Título"/>
+                    <field name="pos_config_id"/>
+                    <field name="company_id"/>
+                    <field name="current_pricelist_id"/>
+                    <separator/>
+                    <filter name="filter_pending" string="Pendientes" domain="[('state', '=', 'pending')]"/>
+                    <filter name="filter_resolved" string="Resueltos" domain="[('state', '=', 'resolved')]"/>
+                    <separator/>
+                    <filter name="filter_today" string="Hoy" domain="[('date', '&gt;=', context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                    <group expand="0" string="Agrupar por">
+                        <filter name="group_company" string="Sucursal" context="{'group_by': 'company_id'}"/>
+                        <filter name="group_pos" string="Caja / TPV" context="{'group_by': 'pos_config_id'}"/>
+                        <filter name="group_type" string="Tipo de Incidencia" context="{'group_by': 'issue_type'}"/>
+                        <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- List / Tree View -->
+        <record id="rdd_pricelist_issue_view_list" model="ir.ui.view">
+            <field name="name">rdd.pricelist.issue.list</field>
+            <field name="model">rdd.pricelist.issue</field>
+            <field name="arch" type="xml">
+                <list string="Incidencias de Tarifas TPV"
+                      decoration-danger="state == 'pending'"
+                      decoration-success="state == 'resolved'"
+                      default_order="date desc">
+                    <field name="date"/>
+                    <field name="name"/>
+                    <field name="company_id"/>
+                    <field name="pos_config_id"/>
+                    <field name="current_pricelist_id"/>
+                    <field name="issue_type"/>
+                    <field name="state" widget="badge"
+                           decoration-danger="state == 'pending'"
+                           decoration-success="state == 'resolved'"/>
+                    <field name="resolved_by" optional="show"/>
+                    <field name="resolved_date" optional="hide"/>
+                    <button name="action_mark_resolved"
+                            string="Resolver"
+                            type="object"
+                            icon="fa-check"
+                            class="btn-success"
+                            invisible="state == 'resolved'"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="rdd_pricelist_issue_view_form" model="ir.ui.view">
+            <field name="name">rdd.pricelist.issue.form</field>
+            <field name="model">rdd.pricelist.issue</field>
+            <field name="arch" type="xml">
+                <form string="Incidencia de Tarifa TPV">
+                    <header>
+                        <button name="action_mark_resolved"
+                                string="Marcar como Resuelto"
+                                type="object"
+                                class="btn-primary"
+                                invisible="state == 'resolved'"/>
+                        <button name="action_reopen"
+                                string="Reabrir Incidencia"
+                                type="object"
+                                class="btn-secondary"
+                                invisible="state == 'pending'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="pending,resolved"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" string="Incidencia"/>
+                            <h1><field name="name" readonly="state == 'resolved'"/></h1>
+                        </div>
+                        <group>
+                            <group string="Ubicación y Tarifa">
+                                <field name="pos_config_id" readonly="state == 'resolved'"/>
+                                <field name="company_id"/>
+                                <field name="current_pricelist_id" readonly="state == 'resolved'"/>
+                                <field name="issue_type" readonly="state == 'resolved'"/>
+                            </group>
+                            <group string="Auditoría y Resolución">
+                                <field name="date" readonly="state == 'resolved'"/>
+                                <field name="resolved_by"/>
+                                <field name="resolved_date"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Detalles de la Incidencia" name="page_details">
+                                <field name="details" placeholder="Descripción técnica del error o listas descartadas..." readonly="state == 'resolved'"/>
+                            </page>
+                            <page string="Notas de Solución" name="page_solution">
+                                <field name="resolution_notes" placeholder="Describa cómo se atendió o corrigió esta incidencia (ej: Se asignó la lista correspondiente para los jueves en San Juan)..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Window Action -->
+        <record id="action_rdd_pricelist_issue" model="ir.actions.act_window">
+            <field name="name">Incidencias de Tarifas TPV</field>
+            <field name="res_model">rdd.pricelist.issue</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="rdd_pricelist_issue_view_search"/>
+            <field name="context">{'search_default_filter_pending': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    ¡No hay incidencias de tarifas pendientes!
+                </p>
+                <p>
+                    Cuando una caja no pueda cambiar de tarifa automáticamente por falta de configuración o error, aparecerá registrada aquí para su monitoreo y atención.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_rdd_pricelist_issue"
+                  name="Incidencias de Tarifas"
+                  parent="point_of_sale.menu_point_config_product"
+                  action="action_rdd_pricelist_issue"
+                  sequence="95"/>
+
+    </data>
+</odoo>

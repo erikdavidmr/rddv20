@@ -195,3 +195,26 @@ class TestRddModuleMigrationContract(TransactionCase):
 
         self.assertEqual(pos_config.pricelist_id, pl_afternoon.id, "Afternoon shift pricelist must be selected at 16:00 local")
 
+    def test_pricelist_issue_tracking_and_resolution(self):
+        real_pos_config = self.env["pos.config"].search([], limit=1)
+        self.assertTrue(real_pos_config, "Must have at least one POS config in test DB")
+
+        issue = self.env["product.pricelist"]._handle_pricelist_issue(
+            real_pos_config,
+            issue_type="no_candidate",
+            details="Test: No schedule configured for Thursday"
+        )
+        self.assertTrue(issue, "Issue record must be created")
+        self.assertEqual(issue.state, "pending")
+        self.assertEqual(issue.pos_config_id.id, real_pos_config.id)
+
+        issue.action_mark_resolved()
+        self.assertEqual(issue.state, "resolved")
+        self.assertEqual(issue.resolved_by, self.env.user)
+        self.assertTrue(issue.resolved_date)
+
+        issue.action_reopen()
+        self.assertEqual(issue.state, "pending")
+        self.assertFalse(issue.resolved_by)
+
+

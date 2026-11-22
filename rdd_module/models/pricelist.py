@@ -89,6 +89,18 @@ class InheritProductPricelist(models.Model):
         """
         Evaluates the best pricelist for a given pos.config based on day, time, and team.
         """
+        try:
+            return self._evaluate_pos_pricelist_core(pos)
+        except Exception as exc:
+            _logger.exception("Error al evaluar lista de precios en POS '%s': %s", getattr(pos, 'name', 'TPV'), exc)
+            self._handle_pricelist_issue(
+                pos,
+                issue_type='exception',
+                details=f"Error inesperado: {str(exc)}"
+            )
+            return None
+
+    def _evaluate_pos_pricelist_core(self, pos):
         company = getattr(pos, 'company_id', None)
         tz_name = getattr(company, 'tz', None) or getattr(self.env.user, 'tz', None) or 'America/Mexico_City'
         try:
@@ -112,6 +124,11 @@ class InheritProductPricelist(models.Model):
         # Get available pricelists for this pos
         available_pls = getattr(pos, 'available_pricelist_ids', self.env['product.pricelist'])
         if not available_pls:
+            self._handle_pricelist_issue(
+                pos,
+                issue_type='no_candidate',
+                details="La caja no tiene ninguna lista de precios asignada en 'available_pricelist_ids'."
+            )
             return None
 
         candidates = []
@@ -148,6 +165,11 @@ class InheritProductPricelist(models.Model):
             candidates.append(pl)
 
         if not candidates:
+            self._handle_pricelist_issue(
+                pos,
+                issue_type='no_candidate',
+                details=f"No se encontró ninguna tarifa configurada para el día '{nombre_dia}' y hora local {current_hour:.2f}h."
+            )
             return None
 
         # Sort candidate pricelists:
@@ -188,19 +210,150 @@ class InheritProductPricelist(models.Model):
             except Exception as bus_err:
                 _logger.debug("No se pudo enviar bus notification para POS %s: %s", getattr(pos, 'name', 'TPV'), bus_err)
 
-        # Send notification email if configured
-        if best_pl.notify_on_change:
-            best_pl._send_pricelist_change_email(pos, old_pl, best_pl, nombre_dia, now_local)
+        # Auto-resolve pending 'no_candidate' issues for this POS if any
+        pos_id = getattr(pos, 'id', None)
+        if pos_id:
+            pending_issues = self.env['rdd.pricelist.issue'].search([
+                ('pos_config_id', '=', pos_id),
+                ('issue_type', '=', 'no_candidate'),
+                ('state', '=', 'pending'),
+            ])
+            if pending_issues:
+                pending_issues.write({
+                    'state': 'resolved',
+                    'resolved_by': self.env.user.id if self.env.user else False,
+                    'resolved_date': fields.Datetime.now(),
+                    'resolution_notes': f"Resuelto automáticamente al entrar en vigencia la lista '{best_pl.name}'.",
+                })
 
         return best_pl
 
-    def correo_lista_precio_pos(self, pos_configs, lista):
-        """Backward compatible notification method."""
-        if not pos_configs:
+    def _handle_pricelist_issue(self, pos, issue_type='no_candidate', details=''):
+        pos_id = getattr(pos, 'id', None)
+        if not pos_id:
+            return None
+
+        pos_name = getattr(pos, 'name', 'TPV')
+        current_pl = getattr(pos, 'pricelist_id', None)
+        current_pl_name = getattr(current_pl, 'name', 'Sin tarifa activa')
+
+        # Check if already registered today to avoid spamming every 15 minutes
+        today_start = fields.Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        existing_issue = self.env['rdd.pricelist.issue'].search([
+            ('pos_config_id', '=', pos_id),
+            ('issue_type', '=', issue_type),
+            ('state', '=', 'pending'),
+            ('date', '>=', today_start),
+        ], limit=1)
+
+        if existing_issue:
+            return existing_issue
+
+        title = f"[{pos_name}] Sin tarifa para horario actual" if issue_type == 'no_candidate' else f"[{pos_name}] Error en cambio de tarifa"
+        issue = self.env['rdd.pricelist.issue'].create({
+            'name': title,
+            'pos_config_id': pos_id,
+            'current_pricelist_id': getattr(current_pl, 'id', False),
+            'issue_type': issue_type,
+            'details': details,
+            'state': 'pending',
+        })
+
+        _logger.warning("Incidencia registrada para POS '%s': %s", pos_name, title)
+        self._send_critical_issue_email(pos, issue, current_pl_name, details)
+        return issue
+
+    def _send_critical_issue_email(self, pos, issue, current_pl_name, details):
+        pos_name = getattr(pos, 'name', 'TPV')
+        company = getattr(pos, 'company_id', None)
+        comp_name = getattr(company, 'name', 'RDD')
+
+        emails_list = []
+        employees = (
+            getattr(pos, 'cashier_employee_ids', self.env['hr.employee']) |
+            getattr(pos, 'manager_employee_ids', self.env['hr.employee']) |
+            getattr(pos, 'supervised_employee_ids', self.env['hr.employee']) |
+            getattr(pos, 'restrictive_employee_ids', self.env['hr.employee'])
+        )
+        for emp_email in employees.mapped('work_email'):
+            if emp_email and emp_email.strip() and '@' in emp_email:
+                emails_list.append(emp_email.strip())
+
+        if company and getattr(company, 'email', False):
+            emails_list.append(company.email.strip())
+
+        for pl in getattr(pos, 'available_pricelist_ids', []):
+            if getattr(pl, 'notification_emails', False):
+                for em in pl.notification_emails.split(','):
+                    em = em.strip()
+                    if em and '@' in em:
+                        emails_list.append(em)
+
+        emails_set = sorted(list({e for e in emails_list if e and '@' in e}))
+        if not emails_set:
+            _logger.info("Sin correos configurados para notificar incidencia en POS '%s'", pos_name)
             return
-        configs = pos_configs if hasattr(pos_configs, '__iter__') else [pos_configs]
-        for pos in configs:
-            self._send_pricelist_change_email(pos, None, self, None, None)
+
+        recipients_str = ', '.join(emails_set)
+        fecha_str = fields.Datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+        body_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; border: 2px solid #d9534f; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #d9534f; color: #ffffff; padding: 18px 24px; text-align: center;">
+                <h2 style="margin: 0; font-size: 20px;">🚨 ALERTA: No se pudo cambiar lista de precios en TPV</h2>
+            </div>
+            <div style="padding: 24px; background-color: #fafafa;">
+                <p style="font-size: 15px; color: #333333; margin-top: 0;">
+                    El sistema de cambio dinámico de tarifas no pudo aplicar ninguna tarifa para la siguiente caja:
+                </p>
+                <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555; width: 35%;">Sucursal / Empresa:</td>
+                        <td style="padding: 12px 16px; color: #222;">{comp_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555;">Caja / TPV:</td>
+                        <td style="padding: 12px 16px; color: #222;">{pos_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555;">Fecha y Hora:</td>
+                        <td style="padding: 12px 16px; color: #222;">{fecha_str}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555;">Tarifa que se mantuvo activa:</td>
+                        <td style="padding: 12px 16px; color: #c9302c; font-weight: bold;">{current_pl_name}</td>
+                    </tr>
+                    <tr style="background-color: #fdf7f7;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #a94442;">Motivo / Detalle:</td>
+                        <td style="padding: 12px 16px; color: #a94442;">{details}</td>
+                    </tr>
+                </table>
+                <div style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px 16px; border-radius: 4px; font-size: 14px;">
+                    <strong>Acción requerida:</strong> Se ha generado un registro en <em>Punto de Venta &gt; Configuración &gt; Incidencias de Tarifas</em>. Favor de ingresar a Odoo para revisar los horarios de tarifas asignados a esta sucursal y marcar la incidencia como resuelta.
+                </div>
+            </div>
+            <div style="background-color: #f1f1f1; padding: 12px 24px; text-align: center; font-size: 12px; color: #999;">
+                Sistema RDD - Alertas críticas de Punto de Venta
+            </div>
+        </div>
+        """
+
+        mail_values = {
+            'subject': f"🚨 ALERTA TPV: Sin tarifa para {pos_name} ({comp_name})",
+            'body_html': body_html,
+            'email_to': recipients_str,
+            'email_from': self.env.company.email or self.env.user.email or 'alertas@rdd.com',
+        }
+
+        try:
+            self.env['mail.mail'].sudo().create(mail_values).send()
+            _logger.info("Correo de ALERTA CRÍTICA de tarifa enviado a: %s", recipients_str)
+        except Exception as mail_err:
+            _logger.error("Error al enviar correo de alerta crítica en POS '%s': %s", pos_name, mail_err)
+
+    def correo_lista_precio_pos(self, pos_configs, lista):
+        """Backward compatible method."""
+        return
 
     def _send_pricelist_change_email(self, pos, old_pl=None, new_pl=None, nombre_dia=None, now_local=None):
         new_pl = new_pl or self
