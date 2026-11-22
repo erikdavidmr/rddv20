@@ -1,11 +1,11 @@
 <section class="oe_container" style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; padding: 40px 0; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
     <!-- Header -->
-    <div style="background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); padding: 50px 20px; text-align: center; color: white; border-radius: 12px 12px 0 0; margin-top: -40px;">
-        <h1 style="font-size: 42px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
-            Módulo Core RDD: Customizaciones POS & Inventario
+    <div style="background: linear-gradient(135deg, #714B67 0%, #4A00E0 100%); padding: 50px 20px; text-align: center; color: white; border-radius: 12px 12px 0 0; margin-top: -40px;">
+        <h1 style="font-size: 40px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+            Módulo Core RDD: POS, Tarifas Dinámicas &amp; Inventario
         </h1>
-        <p style="font-size: 20px; font-weight: 400; opacity: 0.9; max-width: 800px; margin: 0 auto;">
-            El pilar fundamental de personalización para el sistema RDD. Integra características avanzadas de cálculo de PUC Multicompañía, notificaciones por listas de precios, y control de seguridad en el Punto de Venta.
+        <p style="font-size: 18px; font-weight: 400; opacity: 0.95; max-width: 850px; margin: 0 auto; line-height: 1.5;">
+            El núcleo operativo para las sucursales RDD en <b>Odoo 20 Enterprise</b>. Integra conmutación automática de listas de precios por turnos/horarios, monitoreo y auditoría de incidencias en TPV, alertas críticas, PUC Multicompañía y seguridad en el Punto de Venta.
         </p>
     </div>
 
@@ -13,30 +13,30 @@
     <div style="padding: 40px; background: white;">
         <div class="row">
             <div class="col-md-12">
-                <h2 style="color: #4A00E0; font-size: 28px; font-weight: 700; border-bottom: 3px solid #8E2DE2; display: inline-block; padding-bottom: 5px; margin-bottom: 30px;">
-                    Alcances y Funcionalidades
+                <h2 style="color: #4A00E0; font-size: 26px; font-weight: 700; border-bottom: 3px solid #714B67; display: inline-block; padding-bottom: 5px; margin-bottom: 30px;">
+                    Funcionalidades Principales
                 </h2>
             </div>
         </div>
 
         <div class="row" style="margin-bottom: 30px;">
             <div class="col-md-6">
-                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #8E2DE2; transition: transform 0.3s ease;">
-                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
-                        🏢 PUC Multicompañía Avanzado
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #714B67;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
+                        ⏰ Tarifas Dinámicas por Turno y Día
                     </h3>
-                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
-                        El cálculo del Precio Único de Costo (PUC) está aislado por compañía, asegurando que las valoraciones de inventario y márgenes en el Punto de Venta respeten estrictamente el entorno Multi-Cía.
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        Permite programar listas de precios por día de la semana y por <b>horario/turno decimal</b> (ej. Mañana: 08:00 a 14:00 | Tarde: 14:00 a 21:00) con prioridades numéricas de desempate. Evaluado automáticamente en la zona horaria local (<code>America/Mexico_City</code>).
                     </p>
                 </div>
             </div>
             <div class="col-md-6">
-                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #f39c12; transition: transform 0.3s ease;">
-                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
-                        🔐 Control de Cierre POS (Manager PIN)
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #d9534f;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
+                        🚨 Monitoreo de Incidencias de Tarifas
                     </h3>
-                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
-                        Intercepción del cierre de sesión para exigir un PIN de Manager en caso de descuadres, previniendo cierres no autorizados que generen diferencias contables injustificadas.
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        Nueva pantalla en <b>Punto de Venta &gt; Configuración &gt; Incidencias de Tarifas</b> para auditar cuando una caja no tiene tarifa asignada para hoy. Incluye flujo de estados (Pendiente / Resuelto), resolución en 1 clic y registro del usuario que atendió la incidencia.
                     </p>
                 </div>
             </div>
@@ -44,22 +44,45 @@
 
         <div class="row" style="margin-bottom: 30px;">
             <div class="col-md-6">
-                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #27ae60; transition: transform 0.3s ease;">
-                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
-                        📧 Alertas y Notificaciones por Correo
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #f39c12;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
+                        📧 Alertas Críticas (Cero Spam)
                     </h3>
-                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
-                        El sistema incluye crons automáticos que disparan correos a los administradores cuando hay listas de precios actualizadas o se detectan sesiones de caja que quedaron abiertas.
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        Supresión total de correos rutinarios por cambios exitosos. El sistema envía correos <b>únicamente ante anomalías críticas</b>: sesiones de caja que quedaron sin cerrar y fallos donde una caja activa se quedó sin tarifa programada.
                     </p>
                 </div>
             </div>
             <div class="col-md-6">
-                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #2980b9; transition: transform 0.3s ease;">
-                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 20px; margin-top: 0;">
-                        🏷️ Extensiones UI de Productos
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #27ae60;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
+                        🏢 PUC Multicompañía Aislado
                     </h3>
-                    <p style="color: #666; font-size: 15px; line-height: 1.6;">
-                        Integra nuevos campos de permisos especiales en el catálogo, permitiendo un bloqueo selectivo de quienes pueden editar los costos dinámicos de los productos.
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        Aislamiento estricto del Precio Único de Costo (PUC) por compañía, garantizando valoraciones de inventario y márgenes comerciales exactos en cada sucursal física.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #2980b9;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
+                        🔐 Control de Cierre POS (Manager PIN)
+                    </h3>
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        Intercepción del cierre de sesión de caja en caso de descuadres de efectivo, exigiendo el PIN de Manager autorizado antes de permitir el corte de caja.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #8e44ad;">
+                    <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
+                        ⚡ Notificación en Vivo al POS (WebSocket Bus)
+                    </h3>
+                    <p style="color: #666; font-size: 14px; line-height: 1.6;">
+                        Cuando el cron de cada 15 minutos actualiza la lista de una caja, notifica a la pantalla del cajero en tiempo real a través del bus de Odoo, actualizando las nuevas órdenes de venta sin requerir recargar la sesión.
                     </p>
                 </div>
             </div>
@@ -68,14 +91,15 @@
         <!-- Technical Scope -->
         <div class="row">
             <div class="col-md-12">
-                <div style="background: #f8f9fa; padding: 30px; border-radius: 12px; border: 1px solid #e9ecef;">
-                    <h3 style="color: #343a40; font-weight: 700; font-size: 22px; margin-top: 0; margin-bottom: 15px;">
-                        ⚙️ Impacto Técnico y Código
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; border: 1px solid #e9ecef;">
+                    <h3 style="color: #343a40; font-weight: 700; font-size: 20px; margin-top: 0; margin-bottom: 12px;">
+                        ⚙️ Arquitectura Técnica en Odoo 20
                     </h3>
-                    <ul style="color: #555; font-size: 15px; line-height: 1.8; margin-bottom: 0;">
-                        <li><b>Backend POS:</b> Modificación de <code>_load_pos_data</code> para inyectar campos variables multicompañía directo al caché de sesión.</li>
-                        <li><b>Motor Contable:</b> Cálculo en <code>product.template</code> iterando históricamente las últimas 3 órdenes de compra para deducir dinámicamente el PUC unitario y registrar un histórico en Log.</li>
-                        <li><b>Frontend OWL:</b> Parches extensos en los componentes <code>ProductProduct</code> y <code>ClosePosPopup</code>, inyectando flujos de validación adicionales antes de ejecutar las promesas de red.</li>
+                    <ul style="color: #555; font-size: 14px; line-height: 1.8; margin-bottom: 0;">
+                        <li><b>Modelos Extendidos:</b> <code>product.pricelist</code>, <code>pos.config</code>, <code>product.template</code>, <code>res.users</code>.</li>
+                        <li><b>Nuevo Modelo:</b> <code>rdd.pricelist.issue</code> (Auditoría, trazabilidad y resolución de incidencias en TPV).</li>
+                        <li><b>Crons Optimizados:</b> Cron de actualización de listas cada 15 minutos (idempotente) y cron de migración desactivado para máximo rendimiento de servidor.</li>
+                        <li><b>Frontend OWL:</b> Parche en <code>ClosePosPopup</code> para control de autorizaciones de cierre de sesión.</li>
                     </ul>
                 </div>
             </div>
@@ -83,12 +107,9 @@
     </div>
 
     <!-- Footer Stats -->
-    <div style="background: #111; padding: 30px; text-align: center; color: white; border-radius: 0 0 12px 12px;">
-        <p style="font-size: 18px; margin: 0; font-weight: 300;">
-            Elaborado por <b style="color: #8E2DE2;">Gerardo Sarracino</b> y <b style="color: #4A00E0;">Erik Miranda</b> para Odoo 18 Enterprise.
+    <div style="background: #111; padding: 25px; text-align: center; color: white; border-radius: 0 0 12px 12px;">
+        <p style="font-size: 16px; margin: 0; font-weight: 300;">
+            Desarrollado y optimizado por <b style="color: #8E2DE2;">Gerardo Sarracino</b> y <b style="color: #4A00E0;">Erik Miranda</b> para <b>Odoo 20 Enterprise</b>.
         </p>
-        <div style="margin-top: 15px; display: inline-block; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 30px; font-family: monospace; font-size: 16px;">
-            <span style="color: #8E2DE2;">Total Lines of Code (TLoC):</span> <b style="color: white; font-size: 20px;">1,994</b>
-        </div>
     </div>
 </section>
