@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
-from datetime import datetime,date
-from datetime import timedelta
+from datetime import datetime, date, timedelta
+import pytz
 import logging
 _logger = logging.getLogger(__name__)
-#from odoo.exceptions import UserError
 
 
 class InheritProductPricelist(models.Model):
@@ -23,7 +22,6 @@ class InheritProductPricelist(models.Model):
             ('domingo', 'Domingo'),
         ],
         string='Día de la Semana',
-        
     )
     days_apply_m2m = fields.Many2many('pricelist.dias', string="Dias")
 
@@ -31,104 +29,326 @@ class InheritProductPricelist(models.Model):
 
     expire_date = fields.Datetime('Vigencia')
 
+    use_time_schedule = fields.Boolean(
+        string='Restringir por Horario / Turno',
+        default=False,
+        help='Si se activa, esta lista solo se aplicará dentro de la franja horaria configurada.'
+    )
+    hour_from = fields.Float(
+        string='Hora Inicio',
+        default=0.0,
+        help='Hora de inicio en formato decimal (ej: 8.5 para 08:30)'
+    )
+    hour_to = fields.Float(
+        string='Hora Fin',
+        default=24.0,
+        help='Hora fin en formato decimal (ej: 14.0 para 14:00)'
+    )
+    schedule_priority = fields.Integer(
+        string='Prioridad de Turno',
+        default=10,
+        help='Prioridad cuando varias listas coinciden para el mismo día y horario (mayor número = mayor prioridad)'
+    )
+    notify_on_change = fields.Boolean(
+        string='Notificar Cambio de Tarifa',
+        default=True,
+        help='Enviar notificación por correo cuando se active esta lista en una caja'
+    )
+    notification_emails = fields.Char(
+        string='Correos de Notificación',
+        help='Direcciones de correo separadas por coma para recibir avisos de cambio de tarifa'
+    )
+    notify_pos_managers = fields.Boolean(
+        string='Notificar Personal de TPV',
+        default=True,
+        help='Incluir correos de cajeros/encargados asignados al Punto de Venta'
+    )
+
     def change_pricelist(self):
-        for record in self:
-            # Compare stored selection keys, not translated labels. The keys are
-            # deliberately unaccented (e.g. ``miercoles`` and ``sabado``).
-            dias_semana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
-            hoy = datetime.now()
-            nombre_dia = dias_semana[hoy.weekday()]
-            for days in record.days_apply_m2m:
-                if days.day == nombre_dia and (not record.expire_date or hoy <= record.expire_date):
-                    pos = self.env['pos.config'].search([('crm_team_id','in',record.sales_team.ids)])
-                    for pp in pos:
-                        if record.id in pp.available_pricelist_ids.ids:
-                            pp.pricelist_id = record.id
-                            record.correo_lista_precio_pos(pos, record.name)
+        """Evaluate schedule and update pricelist for POS configurations matching these pricelists."""
+        target_pls = self if self else self.search([('active', '=', True)])
+        if not target_pls:
+            return
+
+        domain = []
+        if self:
+            domain = ['|', ('available_pricelist_ids', 'in', target_pls.ids), ('crm_team_id', 'in', target_pls.mapped('sales_team').ids)]
+        pos_configs = self.env['pos.config'].search(domain)
+
+        for pos in pos_configs:
+            self._evaluate_pos_pricelist(pos)
 
     @api.model
     def cron_change_pricelist_all_companies(self):
-        """Run the configured schedule for every pricelist."""
-        self.search([]).change_pricelist()
-                
-    def correo_lista_precio_pos(self, pos_configs, lista):
-        _logger.info(f"Iniciar cron")
-        partner = self.env['res.partner'].browse(3)
-        #pos_configs = self.env['pos.config'].search([('status', '=', 'active')])
+        """Run the configured schedule for all active POS configurations."""
+        pos_configs = self.env['pos.config'].search([])
+        for pos in pos_configs:
+            self._evaluate_pos_pricelist(pos)
 
-        nombre_pos_list = []
+    def _evaluate_pos_pricelist(self, pos):
+        """
+        Evaluates the best pricelist for a given pos.config based on day, time, and team.
+        """
+        company = getattr(pos, 'company_id', None)
+        tz_name = getattr(company, 'tz', None) or getattr(self.env.user, 'tz', None) or 'America/Mexico_City'
+        try:
+            tz = pytz.timezone(tz_name)
+        except Exception:
+            tz = pytz.timezone('America/Mexico_City')
+
+        hoy = datetime.now()
+        if hasattr(tz, 'localize') and hoy.tzinfo is None:
+            try:
+                now_local = pytz.utc.localize(hoy).astimezone(tz)
+            except Exception:
+                now_local = hoy
+        else:
+            now_local = hoy
+
+        dias_semana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+        nombre_dia = dias_semana[now_local.weekday()]
+        current_hour = now_local.hour + (now_local.minute / 60.0) + (now_local.second / 3600.0)
+
+        # Get available pricelists for this pos
+        available_pls = getattr(pos, 'available_pricelist_ids', self.env['product.pricelist'])
+        if not available_pls:
+            return None
+
+        candidates = []
+        for pl in available_pls:
+            if hasattr(pl, 'active') and not pl.active:
+                continue
+            if getattr(pl, 'is_special_td', False):
+                continue
+            if pl.expire_date and hoy > pl.expire_date:
+                continue
+
+            # Check sales_team
+            pos_team = getattr(pos, 'crm_team_id', None)
+            if pl.sales_team and pos_team and pos_team.id not in pl.sales_team.ids:
+                continue
+
+            # Check days
+            if pl.days_apply_m2m:
+                pl_days = [d.day for d in pl.days_apply_m2m if d.day]
+                if nombre_dia not in pl_days:
+                    continue
+
+            # Check time schedule
+            if pl.use_time_schedule:
+                h_from = pl.hour_from or 0.0
+                h_to = pl.hour_to or 24.0
+                if h_from <= h_to:
+                    if not (h_from <= current_hour < h_to):
+                        continue
+                else:
+                    if not (current_hour >= h_from or current_hour < h_to):
+                        continue
+
+            candidates.append(pl)
+
+        if not candidates:
+            return None
+
+        # Sort candidate pricelists:
+        # 1. use_time_schedule (True comes before False)
+        # 2. schedule_priority (higher first)
+        # 3. ID (descending for latest)
+        candidates.sort(
+            key=lambda p: (1 if p.use_time_schedule else 0, p.schedule_priority, p.id),
+            reverse=True
+        )
+        best_pl = candidates[0]
+
+        # Idempotency
+        current_pl_id = getattr(pos.pricelist_id, 'id', pos.pricelist_id)
+        if current_pl_id == best_pl.id:
+            return None
+
+        old_pl = pos.pricelist_id
+        pos.pricelist_id = best_pl.id
+
+        _logger.info(
+            "POS '%s' [%s]: Tarifa actualizada de '%s' -> '%s' (Día: %s, Hora local: %.2fh)",
+            getattr(pos, 'name', 'TPV'),
+            getattr(company, 'name', 'N/A'),
+            getattr(old_pl, 'name', 'N/A') if old_pl else 'N/A',
+            best_pl.name,
+            nombre_dia,
+            current_hour
+        )
+
+        # Notify bus if available
+        if hasattr(pos, '_notify'):
+            try:
+                pos._notify('PRICELIST_CHANGED', {
+                    'pricelist_id': best_pl.id,
+                    'pricelist_name': best_pl.name,
+                })
+            except Exception as bus_err:
+                _logger.debug("No se pudo enviar bus notification para POS %s: %s", getattr(pos, 'name', 'TPV'), bus_err)
+
+        # Send notification email if configured
+        if best_pl.notify_on_change:
+            best_pl._send_pricelist_change_email(pos, old_pl, best_pl, nombre_dia, now_local)
+
+        return best_pl
+
+    def correo_lista_precio_pos(self, pos_configs, lista):
+        """Backward compatible notification method."""
+        if not pos_configs:
+            return
+        configs = pos_configs if hasattr(pos_configs, '__iter__') else [pos_configs]
+        for pos in configs:
+            self._send_pricelist_change_email(pos, None, self, None, None)
+
+    def _send_pricelist_change_email(self, pos, old_pl=None, new_pl=None, nombre_dia=None, now_local=None):
+        new_pl = new_pl or self
         emails_list = []
 
-        for pos in pos_configs:
-            #if pos.status == 'active':
-            nombre_pos_list.append(pos.name)
+        if new_pl.notification_emails:
+            for em in new_pl.notification_emails.split(','):
+                em = em.strip()
+                if em and '@' in em:
+                    emails_list.append(em)
 
-            employees = pos.cashier_employee_ids | pos.manager_employee_ids | pos.supervised_employee_ids | pos.restrictive_employee_ids
-            emails_list.extend(employees.mapped('work_email'))
+        if new_pl.notify_pos_managers:
+            employees = (
+                getattr(pos, 'cashier_employee_ids', self.env['hr.employee']) |
+                getattr(pos, 'manager_employee_ids', self.env['hr.employee']) |
+                getattr(pos, 'supervised_employee_ids', self.env['hr.employee']) |
+                getattr(pos, 'restrictive_employee_ids', self.env['hr.employee'])
+            )
+            for emp_email in employees.mapped('work_email'):
+                if emp_email and emp_email.strip() and '@' in emp_email:
+                    emails_list.append(emp_email.strip())
 
-        # Agregar el correo del partner si existe
-        if partner.email:
-            emails_list.append(partner.email)
+            company = getattr(pos, 'company_id', None)
+            if company and getattr(company, 'email', False):
+                emails_list.append(company.email.strip())
 
-        # Convertimos todo a strings separados por coma
-        nombre_pos = ', '.join(nombre_pos_list)
-        emails = ', '.join({e for e in emails_list if e and isinstance(e, str) and e.strip()})
-        if not emails:
-            _logger.info("No hay correos validos para notificar actualizacion de lista de precios.")
+        emails_set = sorted(list({e for e in emails_list if e and '@' in e}))
+        if not emails_set:
+            _logger.info("Sin correos configurados para notificar cambio en POS '%s'", getattr(pos, 'name', 'TPV'))
             return
 
-        _logger.info(f"Empleados para POS '{nombre_pos}': {emails}")
+        recipients_str = ', '.join(emails_set)
+        pos_name = getattr(pos, 'name', 'TPV')
+        company_name = getattr(getattr(pos, 'company_id', None), 'name', 'RDD')
+        old_name = getattr(old_pl, 'name', 'Ninguna') if old_pl else 'Ninguna'
+        new_name = getattr(new_pl, 'name', 'Nueva Tarifa')
 
-        # Construimos el correo
+        if now_local:
+            hora_str = now_local.strftime('%I:%M %p')
+            fecha_str = now_local.strftime('%d/%m/%Y')
+        else:
+            now_dt = datetime.now()
+            hora_str = now_dt.strftime('%H:%M')
+            fecha_str = now_dt.strftime('%d/%m/%Y')
+
+        dia_label = (nombre_dia or '').capitalize()
+        fecha_display = f"{dia_label}, {fecha_str} ({hora_str})" if dia_label else f"{fecha_str} ({hora_str})"
+
+        body_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #714B67; color: #ffffff; padding: 18px 24px; text-align: center;">
+                <h2 style="margin: 0; font-size: 20px;">Actualización de Lista de Precios en Punto de Venta</h2>
+            </div>
+            <div style="padding: 24px; background-color: #fafafa;">
+                <p style="font-size: 15px; color: #333333; margin-top: 0;">
+                    Se ha actualizado automáticamente la lista de precios predeterminada para la siguiente caja:
+                </p>
+                <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555; width: 35%;">Sucursal / Empresa:</td>
+                        <td style="padding: 12px 16px; color: #222;">{company_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555;">Caja / TPV:</td>
+                        <td style="padding: 12px 16px; color: #222;">{pos_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555;">Fecha y Horario:</td>
+                        <td style="padding: 12px 16px; color: #222;">{fecha_display}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #555;">Lista Anterior:</td>
+                        <td style="padding: 12px 16px; color: #888;">{old_name}</td>
+                    </tr>
+                    <tr style="background-color: #eef7ee;">
+                        <td style="padding: 12px 16px; font-weight: bold; color: #2e7d32;">Nueva Lista Activa:</td>
+                        <td style="padding: 12px 16px; font-weight: bold; color: #2e7d32; font-size: 16px;">{new_name}</td>
+                    </tr>
+                </table>
+                <p style="font-size: 13px; color: #777; margin-bottom: 0;">
+                    Este cambio se aplicará a todas las nuevas ventas iniciadas en este Punto de Venta.
+                </p>
+            </div>
+            <div style="background-color: #f1f1f1; padding: 12px 24px; text-align: center; font-size: 12px; color: #999;">
+                Sistema RDD - Notificación automática de cambio de turnos y listas de precios
+            </div>
+        </div>
+        """
+
         mail_values = {
-            'subject': 'Se ha actualizado la lista de precio',
-            'body_html': f"<p>Se actualizo la lista de precios en estas cajas: {nombre_pos} con la lista {lista}.</p>",
-            'email_to': emails,  # string separado por comas
-            'email_from': self.env.user.email,
+            'subject': f"Cambio de Tarifa POS: {pos_name} ({company_name}) -> {new_name}",
+            'body_html': body_html,
+            'email_to': recipients_str,
+            'email_from': self.env.company.email or self.env.user.email or 'notificaciones@rdd.com',
         }
 
-        # Enviar el correo
-        self.env['mail.mail'].create(mail_values).send()
-        
-    
+        try:
+            self.env['mail.mail'].sudo().create(mail_values).send()
+            _logger.info("Correo de cambio de tarifa enviado a: %s", recipients_str)
+        except Exception as mail_err:
+            _logger.error("Error al enviar correo de cambio de tarifa en POS '%s': %s", pos_name, mail_err)
+
+    @api.model
     def cron_pos_abierto(self):
-        _logger.info(f"Iniciar cron")
-        partner = self.env['res.partner'].browse(3)
+        _logger.info("Iniciar cron pos abierto")
         open_sessions = self.env['pos.session'].search([('state', '=', 'opened')])
         pos_configs = open_sessions.config_id
+        if not pos_configs:
+            return
 
         nombre_pos_list = []
         emails_list = []
 
         for pos in pos_configs:
-            nombre_pos_list.append(pos.name)
-            employees = pos.cashier_employee_ids | pos.manager_employee_ids | pos.supervised_employee_ids | pos.restrictive_employee_ids
-            emails_list.extend(employees.mapped('work_email'))
-        if not nombre_pos_list:
-            return
-        # Agregar el correo del partner si existe
-        if partner.email:
-            emails_list.append(partner.email)
+            company = getattr(pos, 'company_id', None)
+            comp_name = getattr(company, 'name', '')
+            nombre_pos_list.append(f"{pos.name} ({comp_name})" if comp_name else pos.name)
+            employees = (
+                getattr(pos, 'cashier_employee_ids', self.env['hr.employee']) |
+                getattr(pos, 'manager_employee_ids', self.env['hr.employee']) |
+                getattr(pos, 'supervised_employee_ids', self.env['hr.employee']) |
+                getattr(pos, 'restrictive_employee_ids', self.env['hr.employee'])
+            )
+            for em in employees.mapped('work_email'):
+                if em and '@' in em:
+                    emails_list.append(em.strip())
+            if company and getattr(company, 'email', False):
+                emails_list.append(company.email.strip())
 
-        # Convertimos todo a strings separados por coma
         nombre_pos = ', '.join(nombre_pos_list)
-        emails = ', '.join({e for e in emails_list if e and isinstance(e, str) and e.strip()})
+        emails = ', '.join(sorted(list({e for e in emails_list if e and '@' in e})))
         if not emails:
             _logger.info("No hay correos validos para notificar cajas abiertas.")
             return
 
-        _logger.info(f"Empleados para POS '{nombre_pos}': {emails}")
+        _logger.info("Cajas abiertas encontradas '%s'. Enviando aviso a: %s", nombre_pos, emails)
 
-        # Construimos el correo
         mail_values = {
-            'subject': 'Se encontraron con cajas abiertas',
-            'body_html': f"<p>Se encontraron las siguientes cajas abiertas: {nombre_pos}.</p>",
-            'email_to': emails,  # string separado por comas
-            'email_from': self.env.user.email,
+            'subject': 'Aviso: Cajas abiertas detectadas en el sistema',
+            'body_html': f"<p>Se encontraron las siguientes cajas con sesión abierta: <strong>{nombre_pos}</strong>.</p>",
+            'email_to': emails,
+            'email_from': self.env.company.email or self.env.user.email,
         }
 
-        # Enviar el correo
-        self.env['mail.mail'].create(mail_values).send()
+        try:
+            self.env['mail.mail'].sudo().create(mail_values).send()
+        except Exception as e:
+            _logger.error("Error al enviar correo de cajas abiertas: %s", e)
 
     def _compute_price_rule(
             self, products, quantity, currency=None, uom=None, date=False, compute_price=True,

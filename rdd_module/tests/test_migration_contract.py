@@ -130,3 +130,68 @@ class TestRddModuleMigrationContract(TransactionCase):
             pricelist.change_pricelist()
 
         self.assertEqual(pos_config.pricelist_id, pricelist.id)
+
+    def test_pricelist_time_schedule_evaluates_shifts_correctly(self):
+        team = self.env["crm.team"].create({"name": "RDD Shift Team"})
+        dias_record = self.env["pricelist.dias"].create({"nombre": "Wednesday", "day": "miercoles"})
+
+        pl_morning = self.env["product.pricelist"].create({
+            "name": "Morning Shift Pricelist",
+            "currency_id": self.env.company.currency_id.id,
+            "company_id": self.env.company.id,
+            "days_apply_m2m": [(4, dias_record.id)],
+            "sales_team": [(4, team.id)],
+            "use_time_schedule": True,
+            "hour_from": 8.0,
+            "hour_to": 14.0,
+            "schedule_priority": 20,
+            "notify_on_change": False,
+        })
+        pl_afternoon = self.env["product.pricelist"].create({
+            "name": "Afternoon Shift Pricelist",
+            "currency_id": self.env.company.currency_id.id,
+            "company_id": self.env.company.id,
+            "days_apply_m2m": [(4, dias_record.id)],
+            "sales_team": [(4, team.id)],
+            "use_time_schedule": True,
+            "hour_from": 14.0,
+            "hour_to": 21.0,
+            "schedule_priority": 20,
+            "notify_on_change": False,
+        })
+
+        all_pls = pl_morning | pl_afternoon
+        pos_config = SimpleNamespace(
+            name="Caja Test",
+            crm_team_id=team,
+            available_pricelist_ids=all_pls,
+            pricelist_id=False,
+            company_id=self.env.company,
+        )
+
+        class MorningTime:
+            @staticmethod
+            def now():
+                # 2026-11-11 is Wednesday, 10:00 AM local
+                return datetime(2026, 11, 11, 10, 0, 0)
+
+        with patch.object(pricelist_module, "datetime", MorningTime), patch.object(
+            type(self.env["pos.config"]), "search", return_value=[pos_config]
+        ):
+            all_pls.change_pricelist()
+
+        self.assertEqual(pos_config.pricelist_id, pl_morning.id, "Morning shift pricelist must be selected at 10:00")
+
+        class AfternoonTime:
+            @staticmethod
+            def now():
+                # 2026-11-11 is Wednesday, 16:00 (4:00 PM) local
+                return datetime(2026, 11, 11, 16, 0, 0)
+
+        with patch.object(pricelist_module, "datetime", AfternoonTime), patch.object(
+            type(self.env["pos.config"]), "search", return_value=[pos_config]
+        ):
+            all_pls.change_pricelist()
+
+        self.assertEqual(pos_config.pricelist_id, pl_afternoon.id, "Afternoon shift pricelist must be selected at 16:00")
+

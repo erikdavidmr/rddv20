@@ -9,11 +9,24 @@
             <field name="inherit_id" ref="product.product_pricelist_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
-                    <page name="cron_parameters" string="Parametros">
+                    <page name="cron_parameters" string="Programación y Horarios">
                         <group>
-                            <field name="days_apply_m2m" widget="many2many_tags"/>
-                            <field name="sales_team" widget="many2many_tags"/>
-                            <field name="expire_date" />
+                            <group string="Días y Equipos">
+                                <field name="days_apply_m2m" widget="many2many_tags"/>
+                                <field name="sales_team" widget="many2many_tags"/>
+                                <field name="expire_date"/>
+                            </group>
+                            <group string="Horarios y Turnos">
+                                <field name="use_time_schedule"/>
+                                <field name="hour_from" widget="float_time" invisible="not use_time_schedule"/>
+                                <field name="hour_to" widget="float_time" invisible="not use_time_schedule"/>
+                                <field name="schedule_priority"/>
+                            </group>
+                        </group>
+                        <group string="Notificaciones">
+                            <field name="notify_on_change"/>
+                            <field name="notify_pos_managers" invisible="not notify_on_change"/>
+                            <field name="notification_emails" placeholder="ejemplo1@empresa.com, ejemplo2@empresa.com" invisible="not notify_on_change"/>
                         </group>
                     </page>
                     
