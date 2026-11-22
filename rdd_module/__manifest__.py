@@ -13,7 +13,7 @@
     'license': 'OPL-1',
     'category': 'Project',
     'version': '20.0.1.0.0',
-    'depends': ['base', 'point_of_sale', 'product', 'sale', 'stock','stock_delivery', 'l10n_mx_edi', 'purchase', 'hr'],
+    'depends': ['base', 'mail', 'point_of_sale', 'product', 'sale', 'stock','stock_delivery', 'l10n_mx_edi', 'purchase', 'hr'],
 
     'data': [
         'security/groups.xml',
