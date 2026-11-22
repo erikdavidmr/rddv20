@@ -2,7 +2,10 @@ export function isCardPaymentMethod(paymentMethod) {
     if (!paymentMethod) return false;
     if (paymentMethod.apply_card_surcharge) return true;
     const name = (paymentMethod.name || "").toLowerCase();
-    return name.includes("tarjeta") || name.includes("tpv") || name.includes("mifel") || name.includes("terminal");
+    if (name.includes("efectivo") || name.includes("transferencia") || name.includes("vales") || name.includes("cliente")) {
+        return false;
+    }
+    return name.includes("tarjeta") || name.includes("tpv") || name.includes("mifel");
 }
 
 export function findCardPricelist(pos, currentPricelist) {
