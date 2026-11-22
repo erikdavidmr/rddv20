@@ -8,20 +8,19 @@
             <field name="model">rdd.pricelist.issue</field>
             <field name="arch" type="xml">
                 <search string="Buscar Incidencias">
-                    <field name="name" string="Incidencia / Título"/>
+                    <field name="name"/>
                     <field name="pos_config_id"/>
                     <field name="company_id"/>
                     <field name="current_pricelist_id"/>
-                    <separator/>
                     <filter name="filter_pending" string="Pendientes" domain="[('state', '=', 'pending')]"/>
                     <filter name="filter_resolved" string="Resueltos" domain="[('state', '=', 'resolved')]"/>
                     <separator/>
-                    <filter name="filter_today" string="Hoy" domain="[('date', '&gt;=', context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
-                    <group expand="0" string="Agrupar por">
-                        <filter name="group_company" string="Sucursal" context="{'group_by': 'company_id'}"/>
-                        <filter name="group_pos" string="Caja / TPV" context="{'group_by': 'pos_config_id'}"/>
-                        <filter name="group_type" string="Tipo de Incidencia" context="{'group_by': 'issue_type'}"/>
-                        <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="filter_date" string="Fecha" date="date"/>
+                    <group>
+                        <filter name="group_company" string="Sucursal" domain="[]" context="{'group_by': 'company_id'}"/>
+                        <filter name="group_pos" string="Caja / TPV" domain="[]" context="{'group_by': 'pos_config_id'}"/>
+                        <filter name="group_type" string="Tipo de Incidencia" domain="[]" context="{'group_by': 'issue_type'}"/>
+                        <filter name="group_state" string="Estado" domain="[]" context="{'group_by': 'state'}"/>
                     </group>
                 </search>
             </field>
