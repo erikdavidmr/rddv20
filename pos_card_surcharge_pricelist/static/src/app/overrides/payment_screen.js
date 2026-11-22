@@ -10,13 +10,14 @@ patch(PaymentScreen.prototype, {
         if (this.pos.config.enable_card_surcharge && isCard) {
             const currentOrder = this.currentOrder;
             if (currentOrder) {
-                if (!currentOrder.base_cash_pricelist_id) {
-                    currentOrder.base_cash_pricelist_id = currentOrder.pricelist_id;
+                const basePl = currentOrder.base_cash_pricelist_id || currentOrder.pricelist_id || this.pos.config.pricelist_id;
+                if (!currentOrder.base_cash_pricelist_id && basePl) {
+                    currentOrder.base_cash_pricelist_id = basePl;
                 }
 
                 const cardPricelist = findCardPricelist(
                     this.pos,
-                    currentOrder.base_cash_pricelist_id || currentOrder.pricelist_id,
+                    basePl,
                     paymentMethod
                 );
                 if (cardPricelist && currentOrder.pricelist_id?.id !== cardPricelist.id) {

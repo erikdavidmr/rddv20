@@ -30,10 +30,11 @@ patch(Navbar.prototype, {
             }
         } else {
             // Cambiar a lista con tarjeta (+2%)
-            if (!order.base_cash_pricelist_id) {
-                order.base_cash_pricelist_id = order.pricelist_id;
+            const basePl = order.base_cash_pricelist_id || order.pricelist_id || this.pos.config.pricelist_id;
+            if (!order.base_cash_pricelist_id && basePl) {
+                order.base_cash_pricelist_id = basePl;
             }
-            const cardPl = findCardPricelist(this.pos, order.base_cash_pricelist_id || order.pricelist_id);
+            const cardPl = findCardPricelist(this.pos, basePl);
             if (cardPl) {
                 order.setPricelist(cardPl);
                 this.notification.add(
@@ -42,7 +43,7 @@ patch(Navbar.prototype, {
                 );
             } else {
                 this.notification.add(
-                    _t("No se encontró una tarifa espejo 2.0 para la lista activa."),
+                    _t("No se encontró una tarifa espejo 2.0 / Especial TD para la lista activa."),
                     { type: "danger" }
                 );
             }

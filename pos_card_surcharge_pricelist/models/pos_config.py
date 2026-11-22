@@ -31,6 +31,18 @@ class PosConfig(models.Model):
             if not config.default_card_pricelist_id and config.company_id.card_pricelist_id:
                 config.default_card_pricelist_id = config.company_id.card_pricelist_id
 
+    def _get_available_pricelists(self):
+        pricelists = super()._get_available_pricelists()
+        if self.enable_card_surcharge:
+            extra_pls = self.available_pricelist_ids | self.pricelist_id
+            if self.default_card_pricelist_id:
+                extra_pls |= self.default_card_pricelist_id
+            for pm in self.payment_method_ids:
+                if pm.card_pricelist_id:
+                    extra_pls |= pm.card_pricelist_id
+            pricelists |= extra_pls
+        return pricelists
+
     @api.model
     def _load_pos_data_fields(self, config):
         fields = super()._load_pos_data_fields(config)
