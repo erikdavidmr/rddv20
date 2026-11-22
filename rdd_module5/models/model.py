@@ -14,7 +14,8 @@ class PosConfig(models.Model):
         # Odoo 20's pos.config currently inherits the generic loader, whose
         # default field list is empty. Keep the standard POS config payload
         # here so core _load_pos_data_read and the POS client receive it.
-        fields_to_load = [
+        fields_to_load = list(super()._load_pos_data_fields(config))
+        base_fields = [
             "id", "name", "display_name", "access_token", "active", "uuid",
             "company_id", "currency_id", "journal_id", "payment_method_ids",
             "fast_payment_method_ids", "use_fast_payment", "cash_control",
@@ -40,6 +41,9 @@ class PosConfig(models.Model):
             "customer_display_bg_img", "customer_display_bg_img_name",
             "last_data_change", "create_date", "write_date",
         ]
+        for f in base_fields:
+            if f not in fields_to_load:
+                fields_to_load.append(f)
         # pos_sale adds these relations to pos.config and its POS frontend
         # reads config.default_product_id while rendering order lines.
         fields_to_load.extend(
