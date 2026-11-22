@@ -172,26 +172,26 @@ class TestRddModuleMigrationContract(TransactionCase):
         class MorningTime:
             @staticmethod
             def now():
-                # 2026-11-11 is Wednesday, 10:00 AM local
-                return datetime(2026, 11, 11, 10, 0, 0)
+                # 2026-11-11 16:00:00 UTC is 10:00 AM in America/Mexico_City (UTC-6)
+                return datetime(2026, 11, 11, 16, 0, 0)
 
         with patch.object(pricelist_module, "datetime", MorningTime), patch.object(
             type(self.env["pos.config"]), "search", return_value=[pos_config]
         ):
             all_pls.change_pricelist()
 
-        self.assertEqual(pos_config.pricelist_id, pl_morning.id, "Morning shift pricelist must be selected at 10:00")
+        self.assertEqual(pos_config.pricelist_id, pl_morning.id, "Morning shift pricelist must be selected at 10:00 AM local")
 
         class AfternoonTime:
             @staticmethod
             def now():
-                # 2026-11-11 is Wednesday, 16:00 (4:00 PM) local
-                return datetime(2026, 11, 11, 16, 0, 0)
+                # 2026-11-11 22:00:00 UTC is 16:00 (4:00 PM) in America/Mexico_City (UTC-6)
+                return datetime(2026, 11, 11, 22, 0, 0)
 
         with patch.object(pricelist_module, "datetime", AfternoonTime), patch.object(
             type(self.env["pos.config"]), "search", return_value=[pos_config]
         ):
             all_pls.change_pricelist()
 
-        self.assertEqual(pos_config.pricelist_id, pl_afternoon.id, "Afternoon shift pricelist must be selected at 16:00")
+        self.assertEqual(pos_config.pricelist_id, pl_afternoon.id, "Afternoon shift pricelist must be selected at 16:00 local")
 
