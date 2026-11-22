@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Buscador y Calculadora de Precios y Granel para POS - Odoo 20</title>
+</head>
+<body style="font-family: 'Montserrat', 'Open Sans', Helvetica, Arial, sans-serif; color: #2d3748; background-color: #f7fafc; margin: 0; padding: 0;">
+
+<div class="container" style="max-width: 1100px; margin: 30px auto; padding: 20px;">
+
+    <!-- HEADER / BANNER -->
+    <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%); border-radius: 16px; padding: 45px 35px; color: #ffffff; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2); text-align: center; margin-bottom: 35px;">
+        <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.2); padding: 6px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+            Odoo 20.0 Enterprise & Community
+        </div>
+        <h1 style="font-size: 34px; font-weight: 800; margin: 0 0 15px 0; letter-spacing: -0.5px;">
+            POS Price Checker & Bulk Calculator
+        </h1>
+        <h2 style="font-size: 20px; font-weight: 400; margin: 0 auto; max-width: 800px; opacity: 0.95; line-height: 1.5;">
+            Buscador veloz de precios, calculadora bidireccional dinero/peso para venta a granel y conmutador inteligente de presentaciones (Granel vs. Paquete vs. Caja).
+        </h2>
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">✅ Cero bloqueos de Gerente</span>
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">⚖️ Dinero ↔ Kilos/Gramos</span>
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">⌨️ Atajo F4 Inmediato</span>
+            <span style="background: #ffffff; color: #1e3a8a; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 13px;">🔄 Detección de Presentaciones</span>
+        </div>
+    </div>
+
+    <!-- EL PROBLEMA VS LA SOLUCIÓN -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            🎯 ¿Qué problema resuelve este módulo en mostrador?
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div style="background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 18px; border-radius: 8px;">
+                <h4 style="color: #c53030; margin: 0 0 10px 0; font-size: 16px; font-weight: 700;">❌ El problema habitual en la TPV:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #4a5568; font-size: 14px; line-height: 1.6;">
+                    <li>Un cliente pregunta el precio de un artículo o si le alcanza con \$50 pesos.</li>
+                    <li>El cajero agrega el producto a la orden para ver el precio o calcula a mano en una calculadora externa.</li>
+                    <li>Si el cliente decide no comprarlo, el cajero intenta eliminar la línea y el sistema <strong>bloquea la caja pidiendo PIN de Gerente / OTP</strong>.</li>
+                    <li>Fricción, filas lentas y llamadas constantes al supervisor en el mostrador.</li>
+                </ul>
+            </div>
+            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 18px; border-radius: 8px;">
+                <h4 style="color: #15803d; margin: 0 0 10px 0; font-size: 16px; font-weight: 700;">✅ La solución con este módulo:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #4a5568; font-size: 14px; line-height: 1.6;">
+                    <li>El cajero abre la <strong>Calculadora (F4)</strong> sin alterar el ticket de venta.</li>
+                    <li>Escanea el código o busca el producto: ve precios exactos con IVA e IEPS calculados.</li>
+                    <li>Calcula de inmediato cuánto peso equivale a un presupuesto en pesos (\$50) o cuántas piezas caben.</li>
+                    <li>Si no compra, presiona <strong>Esc</strong> y se cierra limpiamente <strong>sin requerir autorización ni dejar rastro</strong>. Si compra, presiona <strong>Enter</strong> y se agrega exacto.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALCANCES Y CAPACIDADES -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            📌 Alcances y Características Clave
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🔍</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Búsqueda Instantánea</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Búsqueda por código de barras, código interno (SKU) o nombre con coincidencia inmediata.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">⚖️</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Venta a Granel Bidireccional</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Ingresa dinero ($) y calcula gramos/kilos. O ingresa peso y calcula dinero con impuestos incluidos.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">📦</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Cálculo de Paquetes y Cajas</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Indica cuántas piezas completas alcanza un presupuesto y el cambio exacto sobrante.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🔄</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Presentaciones Hermanas</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Detecta si el producto existe a granel, paquete o caja y permite conmutar con un solo clic.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">⚡</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Botones Rápidos de Peso</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Chips de un solo toque: 100g, 250g, 500g y 1 Kg para despachos ultrarrápidos.</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <div style="font-size: 26px; margin-bottom: 8px;">🛒</div>
+                <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 6px 0; color: #2d3748;">Inserción Directa</h4>
+                <p style="font-size: 13.5px; color: #718096; margin: 0; line-height: 1.5;">Inserta en la orden activa con la cantidad exacta calculada sin pedir confirmación de báscula redundante.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANUAL DE USO PASO A PASO -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            📖 Manual de Uso Paso a Paso
+        </h3>
+
+        <!-- Paso 1 -->
+        <div style="display: flex; gap: 18px; margin-bottom: 22px; align-items: flex-start;">
+            <div style="background: #2563eb; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0;">1</div>
+            <div>
+                <h4 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 700; color: #1e293b;">Abrir la Calculadora</h4>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
+                    En cualquier momento dentro de la pantalla de venta del TPV:
+                    <br>• Presiona la tecla <strong>F4</strong> en tu teclado, o
+                    <br>• Haz clic en el botón <strong>"Calculadora (F4)"</strong> ubicado en la barra superior junto al menú de órdenes.
+                </p>
+            </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div style="display: flex; gap: 18px; margin-bottom: 22px; align-items: flex-start;">
+            <div style="background: #2563eb; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0;">2</div>
+            <div>
+                <h4 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 700; color: #1e293b;">Buscar o Escanear el Producto</h4>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
+                    El cursor se posiciona automáticamente en el campo de búsqueda.
+                    <br>• Puedes <strong>escanear directamente con la pistola de códigos de barras</strong>, o
+                    <br>• Escribir las primeras letras del nombre o código interno del producto.
+                    <br>• Al seleccionar el producto, se despliega su ficha con precio unitario con impuestos (IVA e IEPS) y sus presentaciones alternativas.
+                </p>
+            </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div style="display: flex; gap: 18px; margin-bottom: 22px; align-items: flex-start;">
+            <div style="background: #2563eb; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0;">3</div>
+            <div>
+                <h4 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 700; color: #1e293b;">Realizar el Cálculo Deseado</h4>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
+                    Tienes dos columnas interactuando en tiempo real:
+                    <br>• <strong>Por Dinero:</strong> Escribe cuánto quiere gastar el cliente (ej. <code>50</code>). El sistema calcula los kilos/gramos exactos que corresponden a ese dinero.
+                    <br>• <strong>Por Peso / Cantidad:</strong> Escribe los kilos (ej. <code>0.250</code>) o usa los botones rápidos <code>[ 100g ]</code> <code>[ 250g ]</code> <code>[ 500g ]</code> <code>[ 1 Kg ]</code> para obtener el precio total a cobrar.
+                </p>
+            </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div style="display: flex; gap: 18px; margin-bottom: 22px; align-items: flex-start;">
+            <div style="background: #2563eb; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0;">4</div>
+            <div>
+                <h4 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 700; color: #1e293b;">Conmutar de Presentación si es Necesario</h4>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
+                    Si el cliente pregunta: <em>"¿Cuánto sale llevarme mejor el paquete cerrado o la caja?"</em>, pulsa la píldora correspondiente en la sección de <strong>"Otras presentaciones disponibles"</strong>. La calculadora cambiará automáticamente a ese producto y actualizará los cálculos.
+                </p>
+            </div>
+        </div>
+
+        <!-- Paso 5 -->
+        <div style="display: flex; gap: 18px; align-items: flex-start;">
+            <div style="background: #2563eb; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0;">5</div>
+            <div>
+                <h4 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 700; color: #1e293b;">Acción Final: Agregar al Ticket o Cerrar</h4>
+                <p style="margin: 0; font-size: 14px; color: #4b5563; line-height: 1.5;">
+                    • <strong>Si el cliente compra:</strong> Haz clic en el botón verde <strong>"Agregar al Ticket (Enter)"</strong> o presiona la tecla <strong>Enter</strong>. El producto se agregará con el peso o cantidad calculada.
+                    <br>• <strong>Si el cliente solo consultó:</strong> Haz clic en <strong>"Cerrar (Esc)"</strong> o presiona la tecla <strong>Esc</strong>. La ventana se cerrará sin modificar el pedido ni solicitar PIN.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- EJEMPLOS PRÁCTICOS -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            💡 Ejemplos Prácticos de Mostrador
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px;">
+                <span style="background: #dbeafe; color: #1e40af; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">Ejemplo 1</span>
+                <h4 style="margin: 8px 0; font-size: 16px; color: #0f172a;">Cliente pide: "Dame \$50 pesos de Bocadín a granel"</h4>
+                <p style="font-size: 13.5px; color: #334155; margin: 0 0 10px 0; line-height: 1.5;">
+                    • El producto cuesta \$254.15 el kilo con impuestos.<br>
+                    • El cajero escribe <code>50</code> en Presupuesto.<br>
+                    • El sistema muestra: <strong>Equivale a: 0.197 Kg (197 gramos) = \$50.07 MXN</strong>.<br>
+                    • Presiona <strong>Enter</strong> y la línea entra al ticket lista para cobrar.
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px;">
+                <span style="background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">Ejemplo 2</span>
+                <h4 style="margin: 8px 0; font-size: 16px; color: #0f172a;">Cliente pregunta: "¿Cuánto es de 250g de gomitas?"</h4>
+                <p style="font-size: 13.5px; color: #334155; margin: 0 0 10px 0; line-height: 1.5;">
+                    • El cajero busca "Gomitas" y pulsa el botón rápido <code>[ 250g ]</code>.<br>
+                    • El sistema muestra de inmediato: <strong>Total a cobrar: \$45.00 MXN</strong>.<br>
+                    • El cliente confirma y se añade con 1 clic al ticket.
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px;">
+                <span style="background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">Ejemplo 3</span>
+                <h4 style="margin: 8px 0; font-size: 16px; color: #0f172a;">Cliente con \$100 de presupuesto para paquetes</h4>
+                <p style="font-size: 13.5px; color: #334155; margin: 0 0 10px 0; line-height: 1.5;">
+                    • El paquete cuesta \$59.63 MXN.<br>
+                    • Al poner <code>100</code> en presupuesto, indica:<br>
+                    <strong>"Alcanza para: 1 paquete (\$59.63 MXN) | Sobran \$40.37 de cambio"</strong>.
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px;">
+                <span style="background: #fee2e2; color: #991b1b; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">Ejemplo 4</span>
+                <h4 style="margin: 8px 0; font-size: 16px; color: #0f172a;">Cliente solo tenía duda y no compra</h4>
+                <p style="font-size: 13.5px; color: #334155; margin: 0 0 10px 0; line-height: 1.5;">
+                    • El cajero consulta el precio en el popup.<br>
+                    • El cliente dice "después lo llevo".<br>
+                    • El cajero pulsa <strong>Esc</strong>.<br>
+                    • <strong>La orden queda limpia, cero líneas eliminadas y sin requerir PIN de gerente.</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIGURACIÓN -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            ⚙️ Configuración del Módulo
+        </h3>
+        <p style="font-size: 14.5px; color: #4b5563; line-height: 1.6;">
+            El módulo funciona <strong>Plug & Play</strong> de manera inmediata al instalarse, pero aprovecha la configuración estándar de Odoo:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">1. Productos Disponibles en TPV:</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    Asegúrate de que los productos que deseas consultar tengan marcada la casilla <em>"Disponible en TPV" (available_in_pos)</em> en su ficha de producto.
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">2. Identificación de Productos a Granel / Pesables:</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    El sistema detecta automáticamente que un producto es de peso si tiene marcada la casilla <em>"Pesar con báscula" (to_weight)</em>, si su unidad de medida contiene <em>"Kg", "Kilo", "Gramo", "Gr"</em>, o si en su nombre se incluye la palabra <em>"Granel"</em>.
+                </p>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <strong style="color: #1e3a8a;">3. Tarifas y Listas de Precios:</strong>
+                <p style="margin: 5px 0 0 0; font-size: 13.5px; color: #475569;">
+                    La calculadora respeta la tarifa o lista de precios activa en la sesión o en la orden actual del Punto de Venta. Si el cliente tiene tarifa de mayoreo asignada, los cálculos de precio se adaptarán automáticamente a esa tarifa.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PERMISOS Y SEGURIDAD -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px;">
+            🔒 Permisos y Seguridad
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead>
+                <tr style="background: #edf2f7; text-align: left;">
+                    <th style="padding: 12px; border-radius: 6px 0 0 0; color: #2d3748;">Rol / Grupo</th>
+                    <th style="padding: 12px; color: #2d3748;">Acceso a la Calculadora (F4)</th>
+                    <th style="padding: 12px; border-radius: 0 6px 0 0; color: #2d3748;">Impacto de Seguridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: 700; color: #1e40af;">Usuario de TPV (Cajero)</td>
+                    <td style="padding: 12px; color: #15803d; font-weight: 600;">✅ Totalmente permitido</td>
+                    <td style="padding: 12px; color: #4b5563;">Puede consultar precios, calcular y despachar a granel sin necesidad de solicitar PIN de gerente ni anular líneas.</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 12px; font-weight: 700; color: #1e40af;">Administrador de TPV (Gerente)</td>
+                    <td style="padding: 12px; color: #15803d; font-weight: 600;">✅ Totalmente permitido</td>
+                    <td style="padding: 12px; color: #4b5563;">Mantiene intacto el control de PIN de anulación de líneas reales en el ticket; se reduce drásticamente las llamadas por consultas falsas.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SOPORTE Y CONTACTO -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin: 0 0 10px 0;">¿Necesitas soporte, consultoría o personalización?</h3>
+        <p style="font-size: 14px; color: #64748b; margin: 0 0 15px 0;">Módulo desarrollado e integrado a medida para la operación de tiendas de mayoreo y venta a granel en Odoo 20.</p>
+        <div style="display: inline-block; background: #eff6ff; padding: 10px 24px; border-radius: 30px; border: 1px solid #bfdbfe;">
+            <a href="mailto:david.2964.erls@gmail.com" style="color: #2563eb; text-decoration: none; font-weight: 700; font-size: 15px;">
+                ✉️ david.2964.erls@gmail.com
+            </a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

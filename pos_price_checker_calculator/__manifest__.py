@@ -16,6 +16,7 @@
     'license': 'OPL-1',
     'depends': ['point_of_sale', 'product'],
     'data': [],
+    'images': ['static/description/icon.png'],
     'assets': {
         'point_of_sale._assets_pos': [
             'pos_price_checker_calculator/static/src/app/price_calculator.scss',
