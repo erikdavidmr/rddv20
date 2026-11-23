@@ -12,7 +12,7 @@
     'author': "gerardosarracino,erikdmr",
     'license': 'OPL-1',
     'category': 'Project',
-    'version': '20.0.1.0.0',
+    'version': '20.0.2.0.0',
     'depends': ['base', 'mail', 'point_of_sale', 'product', 'sale', 'stock','stock_delivery', 'l10n_mx_edi', 'purchase', 'hr'],
 
     'data': [

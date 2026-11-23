@@ -1,11 +1,14 @@
 <section class="oe_container" style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; padding: 40px 0; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
     <!-- Header -->
     <div style="background: linear-gradient(135deg, #714B67 0%, #4A00E0 100%); padding: 50px 20px; text-align: center; color: white; border-radius: 12px 12px 0 0; margin-top: -40px;">
-        <h1 style="font-size: 40px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+        <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.2); padding: 5px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+            Odoo 20.0 Enterprise &bull; Versión 20.0.2.0.0
+        </div>
+        <h1 style="font-size: 38px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
             Módulo Core RDD: POS, Tarifas Dinámicas &amp; Inventario
         </h1>
         <p style="font-size: 18px; font-weight: 400; opacity: 0.95; max-width: 850px; margin: 0 auto; line-height: 1.5;">
-            El núcleo operativo para las sucursales RDD en <b>Odoo 20 Enterprise</b>. Integra conmutación automática de listas de precios por turnos/horarios, monitoreo y auditoría de incidencias en TPV, alertas críticas, PUC Multicompañía y seguridad en el Punto de Venta.
+            El núcleo operativo para las sucursales RDD en <b>Odoo 20 Enterprise</b>. Integra conmutación automática de listas de precios por turnos/horarios, monitoreo y auditoría de incidencias en TPV con Chatter, alertas críticas exclusivas y PUC Multicompañía.
         </p>
     </div>
 
@@ -33,10 +36,10 @@
             <div class="col-md-6">
                 <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #d9534f;">
                     <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
-                        🚨 Monitoreo de Incidencias de Tarifas
+                        🚨 Monitoreo de Incidencias TPV con Chatter
                     </h3>
                     <p style="color: #666; font-size: 14px; line-height: 1.6;">
-                        Nueva pantalla en <b>Punto de Venta &gt; Configuración &gt; Incidencias de Tarifas</b> para auditar cuando una caja no tiene tarifa asignada para hoy. Incluye flujo de estados (Pendiente / Resuelto), resolución en 1 clic y registro del usuario que atendió la incidencia.
+                        Nueva pantalla en <b>Punto de Venta &gt; Configuración &gt; Incidencias de Tarifas</b> para auditar cuando una caja no tiene tarifa asignada para hoy. Incluye flujo de estados (Pendiente / Resuelto), resolución en 1 clic y <b>Chatter con Actividades</b>.
                     </p>
                 </div>
             </div>
@@ -46,7 +49,7 @@
             <div class="col-md-6">
                 <div style="background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); height: 100%; border-left: 5px solid #f39c12;">
                     <h3 style="color: #2c3e50; font-weight: 700; font-size: 19px; margin-top: 0;">
-                        📧 Alertas Críticas (Cero Spam)
+                        📧 Alertas Críticas Exclusivas (Cero Spam)
                     </h3>
                     <p style="color: #666; font-size: 14px; line-height: 1.6;">
                         Supresión total de correos rutinarios por cambios exitosos. El sistema envía correos <b>únicamente ante anomalías críticas</b>: sesiones de caja que quedaron sin cerrar y fallos donde una caja activa se quedó sin tarifa programada.
@@ -88,6 +91,56 @@
             </div>
         </div>
 
+        <!-- GUÍA PASO A PASO -->
+        <div class="row" style="margin-bottom: 30px;">
+            <div class="col-md-12">
+                <div style="background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <h2 style="color: #714B67; font-size: 22px; font-weight: 700; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+                        📖 Guía Paso a Paso de Configuración y Uso
+                    </h2>
+
+                    <div style="margin-bottom: 22px;">
+                        <h4 style="color: #2c3e50; font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+                            1️⃣ Cómo programar una lista de precios por Turno (Mañana / Tarde):
+                        </h4>
+                        <ol style="color: #555; font-size: 14px; line-height: 1.8; margin-bottom: 0; padding-left: 20px;">
+                            <li>Ir a <b>Ventas &gt; Productos &gt; Listas de Precios</b> (o en Punto de Venta &gt; Productos &gt; Tarifas).</li>
+                            <li>Abrir la lista deseada (ej. <i>PILOTO - MAYOREO SAN JUAN</i>).</li>
+                            <li>Hacer clic en la pestaña <b>"Programación y Horarios"</b>.</li>
+                            <li>En <b>Días</b>: Seleccionar los días de aplicación (ej. <i>Lunes, Miércoles</i>).</li>
+                            <li>Activar el conmutador <b>"Restringir por Horario / Turno"</b>.</li>
+                            <li>Configurar <b>Hora Inicio</b> (ej. <code>08:00</code>) y <b>Hora Fin</b> (ej. <code>14:00</code>).</li>
+                            <li>Fijar la <b>Prioridad de Turno</b> (ej. <code>20</code> para que tenga preferencia sobre listas de todo el día).</li>
+                            <li>Guardar. El motor evaluará esta lista automáticamente cada 15 minutos.</li>
+                        </ol>
+                    </div>
+
+                    <div style="margin-bottom: 22px;">
+                        <h4 style="color: #2c3e50; font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+                            2️⃣ Cómo asegurar que la Caja TPV use las tarifas dinámicas:
+                        </h4>
+                        <ol style="color: #555; font-size: 14px; line-height: 1.8; margin-bottom: 0; padding-left: 20px;">
+                            <li>Ir a <b>Punto de Venta &gt; Configuración &gt; Ajustes de TPV</b> de la sucursal.</li>
+                            <li>En la sección <b>Precios &gt; Lista de Precios</b>, verificar que en <b>"Tarifas Disponibles"</b> estén incluidas todas las listas entre las que la caja deba conmutar (ej. <i>Regular, Mayoreo, Regular 2.0, Mayoreo 2.0</i>).</li>
+                        </ol>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #2c3e50; font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+                            3️⃣ Cómo auditar y resolver Incidencias de Tarifas en Odoo:
+                        </h4>
+                        <ol style="color: #555; font-size: 14px; line-height: 1.8; margin-bottom: 0; padding-left: 20px;">
+                            <li>Ir a <b>Punto de Venta &gt; Configuración &gt; Incidencias de Tarifas</b>.</li>
+                            <li>Por defecto se muestran las incidencias en estado <b>Pendiente de Atención (Rojo)</b>.</li>
+                            <li>Hacer clic en la fila de la incidencia para ver el motivo exacto, fecha, caja y la tarifa que se mantuvo activa.</li>
+                            <li>Para resolverla: Presionar el botón verde <b>"Marcar como Resuelto"</b>.</li>
+                            <li>En el <b>Chatter</b> inferior: Puedes planificar actividades (llamadas, recordatorios para el encargado) o registrar notas internas de auditoría.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Technical Scope -->
         <div class="row">
             <div class="col-md-12">
@@ -97,7 +150,7 @@
                     </h3>
                     <ul style="color: #555; font-size: 14px; line-height: 1.8; margin-bottom: 0;">
                         <li><b>Modelos Extendidos:</b> <code>product.pricelist</code>, <code>pos.config</code>, <code>product.template</code>, <code>res.users</code>.</li>
-                        <li><b>Nuevo Modelo:</b> <code>rdd.pricelist.issue</code> (Auditoría, trazabilidad y resolución de incidencias en TPV).</li>
+                        <li><b>Nuevo Modelo:</b> <code>rdd.pricelist.issue</code> (Auditoría, trazabilidad y resolución de incidencias en TPV con <code>mail.thread</code> y <code>mail.activity.mixin</code>).</li>
                         <li><b>Crons Optimizados:</b> Cron de actualización de listas cada 15 minutos (idempotente) y cron de migración desactivado para máximo rendimiento de servidor.</li>
                         <li><b>Frontend OWL:</b> Parche en <code>ClosePosPopup</code> para control de autorizaciones de cierre de sesión.</li>
                     </ul>
